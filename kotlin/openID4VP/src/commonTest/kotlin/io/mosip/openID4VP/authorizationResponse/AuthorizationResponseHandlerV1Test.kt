@@ -10,7 +10,9 @@ import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.testData.*
 import io.mosip.openID4VP.verifier.VerifierResponse
 import kotlin.test.*
-
+private const val TEST_WALLET_NONCE = "test-wallet-nonce"
+private const val INTERNAL_ERROR_MESSAGE =
+    "The wallet encountered an internal error while preparing the authorization response."
 /**
  * Tests for AuthorizationResponseHandler.kt changes from PR #111:
  * - constructUnsignedVPToken passes walletNonce
@@ -33,7 +35,7 @@ class AuthorizationResponseHandlerV1Test {
         openID4VP = OpenID4VP("response-handler-v1-test")
         openID4VP.authorizationRequest = authorizationPresentationExchangeRequest
         setField(openID4VP, "responseDispatchInfo", testDispatchInfo(responseUrl))
-        setField(openID4VP, "walletNonce", "test-wallet-nonce")
+        setField(openID4VP, "walletNonce", TEST_WALLET_NONCE)
     }
 
     @AfterTest
@@ -49,13 +51,13 @@ class AuthorizationResponseHandlerV1Test {
         setField(openID4VP, "authorizationResponseHandler", mockHandler)
 
         every {
-            mockHandler.constructUnsignedVPToken(any(), any(), any(), eq("test-wallet-nonce"))
+            mockHandler.constructUnsignedVPToken(any(), any(), any(), eq(TEST_WALLET_NONCE))
         } returns emptyList()
 
         openID4VP.constructUnsignedVPToken(emptyMap())
 
         verify {
-            mockHandler.constructUnsignedVPToken(any(), any(), any(), eq("test-wallet-nonce"))
+            mockHandler.constructUnsignedVPToken(any(), any(), any(), eq(TEST_WALLET_NONCE))
         }
     }
 
@@ -97,16 +99,16 @@ class AuthorizationResponseHandlerV1Test {
         val capturedEx = slot<Exception>()
         every {
             mockHandler.constructAuthorizationErrorResponse(any(), capture(capturedEx), any(), any())
-        } returns mapOf("error" to "server_error", "error_description" to "The wallet encountered an internal error while preparing the authorization response.")
+        } returns mapOf("error" to "server_error", "error_description" to INTERNAL_ERROR_MESSAGE)
 
         val result = openID4VP.constructVPResponse(emptyList())
 
         assertEquals("server_error", result["error"])
-        assertEquals("The wallet encountered an internal error while preparing the authorization response.", result["error_description"])
+        assertEquals(INTERNAL_ERROR_MESSAGE, result["error_description"])
 
         val capturedError = assertIs<OpenID4VPExceptions.AuthorizationResponseConstructionFailure>(capturedEx.captured)
         assertEquals("server_error", capturedError.errorCode)
-        assertEquals("The wallet encountered an internal error while preparing the authorization response.", capturedError.message)
+        assertEquals(INTERNAL_ERROR_MESSAGE, capturedError.message)
         val cause = assertIs<OpenID4VPExceptions.InvalidData>(capturedError.cause)
         assertEquals("bad signing result", cause.message)
     }
@@ -186,7 +188,7 @@ class AuthorizationResponseHandlerV1Test {
             openID4VP.sendVPResponseToVerifier(emptyList())
         }
         assertEquals("server_error", thrown.errorCode)
-        assertEquals("The wallet encountered an internal error while preparing the authorization response.", thrown.message)
+        assertEquals(INTERNAL_ERROR_MESSAGE, thrown.message)
         val cause = assertIs<OpenID4VPExceptions.InvalidData>(thrown.cause)
         assertEquals("VP token construction failed", cause.message)
 

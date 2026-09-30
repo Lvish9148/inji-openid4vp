@@ -50,6 +50,11 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+private const val TEST_WALLET_APP_ID = "test-OpenID4VP"
+private const val CONTENT_TYPE_HEADER = "content-type"
+private const val AUTHZ_REQ_JWT_CONTENT_TYPE = "application/oauth-authz-req+jwt"
+private const val CLIENT_ID_MISMATCH_MESSAGE = "Client Id mismatch in Authorization Request parameter and the Request Object"
+private const val AUTHZ_REQ_JWT_TYP = "oauth-authz-req+jwt"
 
 class AuthRequestByReferenceTest {
 
@@ -57,7 +62,7 @@ class AuthRequestByReferenceTest {
 
     @BeforeTest
     fun setUp() {
-        openID4VP = OpenID4VP("test-OpenID4VP", WalletConfig(trustedVerifiers = trustedVerifiers))
+        openID4VP = OpenID4VP(TEST_WALLET_APP_ID, WalletConfig(trustedVerifiers = trustedVerifiers))
 
         mockkStatic("io.mosip.openID4VP.authorizationRequest.AuthorizationRequestUtilsKt")
         every { validateWalletNonce(any(), any()) } just runs
@@ -100,7 +105,7 @@ class AuthRequestByReferenceTest {
         } returns NetworkResponse(
             200,
             createAuthorizationRequestObject(DECENTRALIZED_IDENTIFIER, authorizationRequestParamsMap).toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encodedAuthorizationRequest =
@@ -116,7 +121,7 @@ class AuthRequestByReferenceTest {
                 requestUrl,
                 GET,
                 null,
-                match { it["accept"] == "application/oauth-authz-req+jwt" }
+                match { it["accept"] == AUTHZ_REQ_JWT_CONTENT_TYPE }
             )
         }
     }
@@ -137,7 +142,7 @@ class AuthRequestByReferenceTest {
         } returns NetworkResponse(
             200,
             createAuthorizationRequestObject(DECENTRALIZED_IDENTIFIER, authorizationRequestParamsMap).toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
 
@@ -147,7 +152,7 @@ class AuthRequestByReferenceTest {
             DECENTRALIZED_IDENTIFIER
         )
 
-        val openID4VP = OpenID4VP("test-OpenID4VP", walletConfig)
+        val openID4VP = OpenID4VP(TEST_WALLET_APP_ID, walletConfig)
 
         openID4VP.authenticateVerifier(
             encodedAuthorizationRequest
@@ -174,7 +179,7 @@ class AuthRequestByReferenceTest {
                     CLIENT_ID.value to "wrong-client-id",
                     "client_id_scheme" to "did"
                 )
-            ).toString(), mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            ).toString(), mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val authorizationRequestParamsMap = requestParams + clientIdOfDid
@@ -189,7 +194,7 @@ class AuthRequestByReferenceTest {
         }
 
         assertEquals(
-            "Client Id mismatch in Authorization Request parameter and the Request Object",
+            CLIENT_ID_MISMATCH_MESSAGE,
             exception.message
         )
     }
@@ -207,7 +212,7 @@ class AuthRequestByReferenceTest {
         } returns NetworkResponse(
             200,
             createAuthorizationRequestObject(DECENTRALIZED_IDENTIFIER, authorizationRequestParamsMap).toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encodedAuthorizationRequest = createUrlEncodedData(
@@ -225,7 +230,7 @@ class AuthRequestByReferenceTest {
                 requestUrl,
                 GET,
                 null,
-                match { it["accept"] == "application/oauth-authz-req+jwt" }
+                match { it["accept"] == AUTHZ_REQ_JWT_CONTENT_TYPE }
             )
         }
 
@@ -245,7 +250,7 @@ class AuthRequestByReferenceTest {
         } returns NetworkResponse(
             200,
             createAuthorizationRequestObject(DECENTRALIZED_IDENTIFIER, authorizationRequestParamsMap).toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encodedAuthorizationRequest =
@@ -280,7 +285,7 @@ class AuthRequestByReferenceTest {
                 authorizationRequestParamsMap,
                 draftVersion = 21
             ).toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encodedAuthorizationRequest =
@@ -316,7 +321,7 @@ class AuthRequestByReferenceTest {
         } returns NetworkResponse(
             200,
             validJwt.toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encodedAuthorizationRequest = createUrlEncodedData(
@@ -351,7 +356,7 @@ class AuthRequestByReferenceTest {
         } returns NetworkResponse(
             200,
             validJwt.toString(),
-            mapOf("content-type" to listOf("application/json"))
+            mapOf(CONTENT_TYPE_HEADER to listOf("application/json"))
         )
 
         val encodedAuthorizationRequest = createUrlEncodedData(
@@ -386,7 +391,7 @@ class AuthRequestByReferenceTest {
         } returns NetworkResponse(
             200,
             unsignedJwt,
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encodedAuthorizationRequest = createUrlEncodedData(
@@ -430,7 +435,7 @@ class AuthRequestByReferenceTest {
         } returns NetworkResponse(
             200,
             invalidSignedJwt.toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
 
@@ -496,7 +501,7 @@ class AuthRequestByReferenceTest {
             authorizationRequestParamsMap,
             jwtHeader = buildJsonObject {
                 put("alg", "HS256")
-                put("typ", "oauth-authz-req+jwt")
+                put("typ", AUTHZ_REQ_JWT_TYP)
             }
         )
 
@@ -505,7 +510,7 @@ class AuthRequestByReferenceTest {
         } returns NetworkResponse(
             200,
             jwtWithUnsupportedAlg.toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encodedAuthorizationRequest = createUrlEncodedData(
@@ -545,12 +550,12 @@ class AuthRequestByReferenceTest {
                 authorizationRequestParamsMap,
                 draftVersion = 21,
                 jwtHeader = buildJsonObject {
-                    put("typ", "oauth-authz-req+jwt")
+                    put("typ", AUTHZ_REQ_JWT_TYP)
                     put("alg", "EdDSA")
                 },
                 isPresentationDefinitionUriPresent = true
             ).toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encodedAuthorizationRequest = createUrlEncodedData(
@@ -581,7 +586,7 @@ class AuthRequestByReferenceTest {
         } returns NetworkResponse(
             200,
             "",
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encodedAuthorizationRequest =
@@ -618,7 +623,7 @@ class AuthRequestByReferenceTest {
         } returns NetworkResponse(
             200,
             jwt.toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encodedAuthorizationRequest = createUrlEncodedData(
@@ -646,7 +651,7 @@ class AuthRequestByReferenceTest {
         val jwsWithoutAlg = createAuthorizationRequestObject(
             clientIdScheme = DECENTRALIZED_IDENTIFIER,
             requestParamsMap,
-            jwtHeader = buildJsonObject { put("typ", "oauth-authz-req+jwt") }
+            jwtHeader = buildJsonObject { put("typ", AUTHZ_REQ_JWT_TYP) }
         )
 
         every {
@@ -654,7 +659,7 @@ class AuthRequestByReferenceTest {
         } returns NetworkResponse(
             200,
             jwsWithoutAlg.toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encoded = createUrlEncodedData(requestParamsMap, true, DECENTRALIZED_IDENTIFIER)
@@ -676,7 +681,7 @@ class AuthRequestByReferenceTest {
     fun `should return back authorization request successfully when authorization request is obtained by reference in pre-registered client id scheme`() {
         val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered
         val jwtHeader = buildJsonObject {
-            put("typ", "oauth-authz-req+jwt")
+            put("typ", AUTHZ_REQ_JWT_TYP)
             put("alg", "EdDSA")
         }
         every {
@@ -692,7 +697,7 @@ class AuthRequestByReferenceTest {
                 authorizationRequestParamsMap,
                 jwtHeader = jwtHeader,
                 isPresentationDefinitionUriPresent = true
-            ).toString(), mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            ).toString(), mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encodedAuthorizationRequest =
@@ -713,7 +718,7 @@ class AuthRequestByReferenceTest {
     @Test
     fun `should validate client_id when authorization request is obtained by reference in pre-registered client id scheme`() {
         val jwtHeader = buildJsonObject {
-            put("typ", "oauth-authz-req+jwt")
+            put("typ", AUTHZ_REQ_JWT_TYP)
             put("alg", "EdDSA")
         }
         every {
@@ -726,7 +731,7 @@ class AuthRequestByReferenceTest {
                 ),
                 jwtHeader = jwtHeader
             ).toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered
@@ -741,7 +746,7 @@ class AuthRequestByReferenceTest {
             }
 
         assertEquals(
-            "Client Id mismatch in Authorization Request parameter and the Request Object",
+            CLIENT_ID_MISMATCH_MESSAGE,
             invalidClientIdException.message
         )
     }
@@ -752,9 +757,9 @@ class AuthRequestByReferenceTest {
 
         val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered +
                 mapOf(AuthorizationRequestFieldConstants.REQUEST_URI_METHOD.value to "post")
-        openID4VP = OpenID4VP("test-OpenID4VP", WalletConfig(trustedVerifiers = trustedVerifiers))
+        openID4VP = OpenID4VP(TEST_WALLET_APP_ID, WalletConfig(trustedVerifiers = trustedVerifiers))
         val jwtHeader = buildJsonObject {
-            put("typ", "oauth-authz-req+jwt")
+            put("typ", AUTHZ_REQ_JWT_TYP)
             put("alg", "EdDSA")
         }
         every {
@@ -764,7 +769,7 @@ class AuthRequestByReferenceTest {
                 PRE_REGISTERED, authorizationRequestParamsMap,
                 jwtHeader = jwtHeader,
                 isPresentationDefinitionUriPresent = true
-            ).toString(), mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            ).toString(), mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encoded = createUrlEncodedData(authorizationRequestParamsMap, true, PRE_REGISTERED)
@@ -775,9 +780,9 @@ class AuthRequestByReferenceTest {
     @Test
     fun `should throw when alg is not-supported in wallet metadata`() {
 
-        openID4VP = OpenID4VP("test-OpenID4VP", WalletConfig(trustedVerifiers = trustedVerifiers))
+        openID4VP = OpenID4VP(TEST_WALLET_APP_ID, WalletConfig(trustedVerifiers = trustedVerifiers))
         val jwtHeader = buildJsonObject {
-            put("typ", "oauth-authz-req+jwt")
+            put("typ", AUTHZ_REQ_JWT_TYP)
             put("alg", "ES256")
         }
         every {
@@ -790,7 +795,7 @@ class AuthRequestByReferenceTest {
                 ),
                 jwtHeader = jwtHeader
             ).toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encoded = createUrlEncodedData(
@@ -817,7 +822,7 @@ class AuthRequestByReferenceTest {
         )
 
         val jwtHeader = buildJsonObject {
-            put("typ", "oauth-authz-req+jwt")
+            put("typ", AUTHZ_REQ_JWT_TYP)
             put("alg", "EdDSA")
         }
 
@@ -830,7 +835,7 @@ class AuthRequestByReferenceTest {
                 jwtHeader = jwtHeader,
 
                 ).toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encoded = createUrlEncodedData(authorizationRequestParamsMap, true, PRE_REGISTERED)
@@ -851,7 +856,7 @@ class AuthRequestByReferenceTest {
                 mapOf(AuthorizationRequestFieldConstants.REQUEST_URI_METHOD.value to "post")
 
         val jwtHeader = buildJsonObject {
-            put("typ", "oauth-authz-req+jwt")
+            put("typ", AUTHZ_REQ_JWT_TYP)
             put("alg", "EdDSA")
         }
 
@@ -865,7 +870,7 @@ class AuthRequestByReferenceTest {
 
                 removeClientId = true
             ).toString(),
-            mapOf("content-type" to listOf("application/oauth-authz-req+jwt"))
+            mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
         val encoded = createUrlEncodedData(authorizationRequestParamsMap, true, PRE_REGISTERED)
@@ -875,7 +880,7 @@ class AuthRequestByReferenceTest {
         }
 
         assertEquals(
-            "Client Id mismatch in Authorization Request parameter and the Request Object",
+            CLIENT_ID_MISMATCH_MESSAGE,
             exception.message
         )
     }

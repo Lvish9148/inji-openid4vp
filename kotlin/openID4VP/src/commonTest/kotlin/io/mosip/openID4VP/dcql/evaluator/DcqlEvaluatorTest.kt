@@ -36,6 +36,11 @@ import io.mosip.openID4VP.common.taggedCbor24
 import jakarta.json.Json as JakartaJson
 import jakarta.json.JsonArray
 
+private const val EMPLOYEE_CARD = "employee-card"
+private const val EMPLOYEE_URL = "https://example.com/employee"
+private const val SDJWT_1 = "sdjwt-1"
+private const val MDOC_1 = "mdoc-1"
+
 class DcqlEvaluatorTest {
 
     private val evaluator = DcqlEvaluator()
@@ -69,19 +74,19 @@ class DcqlEvaluatorTest {
         val query = DCQLQuery(
             credentials = listOf(
                 CredentialQuery(
-                    id = "employee-card",
+                    id = EMPLOYEE_CARD,
                     format = FormatType.VC_SD_JWT.value,
-                    meta = mapOf("vct_values" to listOf("https://example.com/employee"))
+                    meta = mapOf("vct_values" to listOf(EMPLOYEE_URL))
                 )
             )
         )
 
-        val result = evaluator.evaluate(query, listOf(DCQLTestFixtures.sdJwtCredential(id = "sdjwt-1")))
+        val result = evaluator.evaluate(query, listOf(DCQLTestFixtures.sdJwtCredential(id = SDJWT_1)))
 
         assertTrue(result.success)
         assertEquals(
-            listOf("sdjwt-1"),
-            result.queryMatches["employee-card"]?.matchingCredentials?.map { it.credentialId }
+            listOf(SDJWT_1),
+            result.queryMatches[EMPLOYEE_CARD]?.matchingCredentials?.map { it.credentialId }
         )
     }
 
@@ -97,10 +102,10 @@ class DcqlEvaluatorTest {
             )
         )
 
-        val result = evaluator.evaluate(query, listOf(DCQLTestFixtures.mdocCredential("mdoc-1")))
+        val result = evaluator.evaluate(query, listOf(DCQLTestFixtures.mdocCredential(MDOC_1)))
 
         assertTrue(result.success)
-        assertEquals("mdoc-1", result.queryMatches["mobile-id"]?.matchingCredentials?.first()?.credentialId)
+        assertEquals(MDOC_1, result.queryMatches["mobile-id"]?.matchingCredentials?.first()?.credentialId)
     }
 
     @Test
@@ -136,7 +141,7 @@ class DcqlEvaluatorTest {
             )
         )
 
-        val result = evaluator.evaluate(query, listOf(sdJwtCredential(id = "sdjwt-1")))
+        val result = evaluator.evaluate(query, listOf(sdJwtCredential(id = SDJWT_1)))
 
         assertTrue(result.success)
         assertEquals(1, result.queryMatches["employee-sd-jwt"]?.matchingCredentials?.first()?.matchingClaims?.size)
@@ -147,9 +152,9 @@ class DcqlEvaluatorTest {
         val query = DCQLQuery(
             credentials = listOf(
                 CredentialQuery(
-                    id = "employee-card",
+                    id = EMPLOYEE_CARD,
                     format = FormatType.VC_SD_JWT.value,
-                    meta = mapOf("vct_values" to listOf("https://example.com/employee"))
+                    meta = mapOf("vct_values" to listOf(EMPLOYEE_URL))
                 )
             )
         )
@@ -158,33 +163,33 @@ class DcqlEvaluatorTest {
             query,
             listOf(
                 DCQLTestFixtures.sdJwtCredential(
-                    id = "sdjwt-1",
+                    id = SDJWT_1,
                     vct = "https://example.com/other"
                 )
             )
         )
 
         assertFalse(result.success)
-        assertNull(result.queryMatches["employee-card"]?.matchingCredentials)
+        assertNull(result.queryMatches[EMPLOYEE_CARD]?.matchingCredentials)
         assertEquals(
             DCQLEvaluationErrorCodes.CRYPTOGRAPHIC_HOLDER_BINDING_OR_META_FILTER_MISMATCH.value,
-            result.queryMatches["employee-card"]?.failureReason
+            result.queryMatches[EMPLOYEE_CARD]?.failureReason
         )
     }
 
     @Test
     fun `should return failure with no matching formats when format does not match`() {
         val query = DCQLQuery(
-            credentials = listOf(CredentialQuery(id = "employee-card", format = FormatType.VC_SD_JWT.value))
+            credentials = listOf(CredentialQuery(id = EMPLOYEE_CARD, format = FormatType.VC_SD_JWT.value))
         )
 
-        val result = evaluator.evaluate(query, listOf(DCQLTestFixtures.mdocCredential("mdoc-1")))
+        val result = evaluator.evaluate(query, listOf(DCQLTestFixtures.mdocCredential(MDOC_1)))
 
         assertFalse(result.success)
-        assertNull(result.queryMatches["employee-card"]?.matchingCredentials)
+        assertNull(result.queryMatches[EMPLOYEE_CARD]?.matchingCredentials)
         assertEquals(
             DCQLEvaluationErrorCodes.NO_MATCHING_FORMATS_FOUND.value,
-            result.queryMatches["employee-card"]?.failureReason
+            result.queryMatches[EMPLOYEE_CARD]?.failureReason
         )
     }
 
@@ -193,10 +198,10 @@ class DcqlEvaluatorTest {
         val query = DCQLQuery(
             credentials = listOf(
                 CredentialQuery(
-                    id = "employee-card",
+                    id = EMPLOYEE_CARD,
                     format = FormatType.VC_SD_JWT.value,
                     multiple = true,
-                    meta = mapOf("vct_values" to listOf("https://example.com/employee"))
+                    meta = mapOf("vct_values" to listOf(EMPLOYEE_URL))
                 )
             )
         )
@@ -204,14 +209,14 @@ class DcqlEvaluatorTest {
         val result = evaluator.evaluate(
             query,
             listOf(
-                DCQLTestFixtures.sdJwtCredential(id = "sdjwt-1"),
+                DCQLTestFixtures.sdJwtCredential(id = SDJWT_1),
                 DCQLTestFixtures.sdJwtCredential(id = "sdjwt-2")
             )
         )
 
         assertTrue(result.success)
-        assertEquals(2, result.queryMatches["employee-card"]?.matchingCredentials?.size)
-        assertTrue(result.queryMatches["employee-card"]?.allowMultipleCredentials == true)
+        assertEquals(2, result.queryMatches[EMPLOYEE_CARD]?.matchingCredentials?.size)
+        assertTrue(result.queryMatches[EMPLOYEE_CARD]?.allowMultipleCredentials == true)
     }
 
     @Test
@@ -225,10 +230,10 @@ class DcqlEvaluatorTest {
             )
         )
 
-        val result = evaluator.evaluate(query, listOf(DCQLTestFixtures.sdJwtCredential(id = "sdjwt-1")))
+        val result = evaluator.evaluate(query, listOf(DCQLTestFixtures.sdJwtCredential(id = SDJWT_1)))
 
         assertTrue(result.success)
-        assertEquals("sdjwt-1", result.queryMatches["any-sdjwt"]?.matchingCredentials?.first()?.credentialId)
+        assertEquals(SDJWT_1, result.queryMatches["any-sdjwt"]?.matchingCredentials?.first()?.credentialId)
     }
 
     @Test
@@ -239,7 +244,7 @@ class DcqlEvaluatorTest {
                     id = "bound-card",
                     format = FormatType.VC_SD_JWT.value,
                     requireCryptographicHolderBinding = true,
-                    meta = mapOf("vct_values" to listOf("https://example.com/employee"))
+                    meta = mapOf("vct_values" to listOf(EMPLOYEE_URL))
                 )
             )
         )
@@ -260,7 +265,7 @@ class DcqlEvaluatorTest {
                 CredentialQuery(
                     id = "sdjwt-query",
                     format = FormatType.VC_SD_JWT.value,
-                    meta = mapOf("vct_values" to listOf("https://example.com/employee"))
+                    meta = mapOf("vct_values" to listOf(EMPLOYEE_URL))
                 ),
                 CredentialQuery(
                     id = "mdoc-query",
@@ -273,15 +278,15 @@ class DcqlEvaluatorTest {
         val result = evaluator.evaluate(
             query,
             listOf(
-                DCQLTestFixtures.sdJwtCredential(id = "sdjwt-1"),
-                DCQLTestFixtures.mdocCredential("mdoc-1")
+                DCQLTestFixtures.sdJwtCredential(id = SDJWT_1),
+                DCQLTestFixtures.mdocCredential(MDOC_1)
             )
         )
 
         assertTrue(result.success)
         assertEquals(2, result.queryMatches.size)
-        assertEquals("sdjwt-1", result.queryMatches["sdjwt-query"]?.matchingCredentials?.first()?.credentialId)
-        assertEquals("mdoc-1", result.queryMatches["mdoc-query"]?.matchingCredentials?.first()?.credentialId)
+        assertEquals(SDJWT_1, result.queryMatches["sdjwt-query"]?.matchingCredentials?.first()?.credentialId)
+        assertEquals(MDOC_1, result.queryMatches["mdoc-query"]?.matchingCredentials?.first()?.credentialId)
     }
 
     @Test

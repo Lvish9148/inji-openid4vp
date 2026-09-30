@@ -11,7 +11,9 @@ class DecoderTest {
 
     @BeforeTest
     fun setUp() {
-
+        // Intentionally empty: decodeFromBase64Url has no static/global state to mock here,
+        // so there is nothing to initialize before a test runs.
+        // Kept for symmetry with tearDown(), which does need to reset mocks afterward.
     }
 
     @AfterTest

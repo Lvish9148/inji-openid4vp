@@ -15,6 +15,7 @@ import io.mosip.openID4VP.networkManager.NetworkResponse
 import io.mosip.openID4VP.testData.*
 import kotlin.test.*
 
+private const val AUTHZ_REQ_JWT_TYP = "oauth-authz-req+jwt"
 /**
  * Tests for ClientIdPrefixBasedAuthorizationRequestHandler.kt changes from PR #111:
  * - JWS typ header validation (must be "oauth-authz-req+jwt")
@@ -59,7 +60,7 @@ class ClientIdPrefixBasedAuthorizationRequestHandlerTypValidationTest {
         }
 
         assertTrue(
-            exception.message!!.contains("typ") || exception.message!!.contains("oauth-authz-req+jwt"),
+            exception.message!!.contains("typ") || exception.message!!.contains(AUTHZ_REQ_JWT_TYP),
             "Error should mention typ header validation failure, got: ${exception.message}"
         )
     }
@@ -83,7 +84,7 @@ class ClientIdPrefixBasedAuthorizationRequestHandlerTypValidationTest {
         }
 
         assertTrue(
-            exception.message!!.contains("oauth-authz-req+jwt"),
+            exception.message!!.contains(AUTHZ_REQ_JWT_TYP),
             "Error should mention expected typ value, got: ${exception.message}"
         )
     }
@@ -119,7 +120,7 @@ class ClientIdPrefixBasedAuthorizationRequestHandlerTypValidationTest {
         }
 
         assertTrue(
-            exception.message!!.contains("oauth-authz-req+jwt") || exception.message!!.contains("typ"),
+            exception.message!!.contains(AUTHZ_REQ_JWT_TYP) || exception.message!!.contains("typ"),
             "Error should mention typ validation, got: ${exception.message}"
         )
     }

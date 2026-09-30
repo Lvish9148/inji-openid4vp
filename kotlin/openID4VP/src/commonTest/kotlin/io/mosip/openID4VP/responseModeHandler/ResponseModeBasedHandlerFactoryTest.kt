@@ -70,10 +70,10 @@ class ResponseModeBasedHandlerFactoryTest {
         val exception = assertFailsWith<InvalidData> {
             ResponseModeBasedHandlerFactory.get(modeWithSpaces)
         }
-assertEquals(
-    "Given response_mode - $modeWithSpaces is not supported",
-    exception.message
-)
+        assertEquals(
+            "Given response_mode - $modeWithSpaces is not supported",
+            exception.message
+        )
     }
 
    @Test
@@ -120,10 +120,10 @@ fun `get should validate all supported response mode constants`() {
             val exception = assertFailsWith<InvalidData> {
                 ResponseModeBasedHandlerFactory.get(mode)
             }
-
-    assertEquals(
-        "Given response_mode - $mode is not supported",
-        exception.message)
+            assertEquals(
+                "Given response_mode - $mode is not supported",
+                exception.message
+            )
         }
     }
 

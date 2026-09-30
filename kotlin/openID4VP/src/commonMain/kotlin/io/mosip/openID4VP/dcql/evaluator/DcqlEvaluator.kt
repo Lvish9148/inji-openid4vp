@@ -143,13 +143,7 @@ internal class DcqlEvaluator {
                 if (claimsCheckFailureReason == null) {
                     claimsCheckFailureReason = failureReason
                 }
-                for (failure in claimFailures) {
-                    val deduplicationKey =
-                        "${failure.reason}:${failure.claim.path.joinToString(".")}"
-                    if (failedClaimKeys.add(deduplicationKey)) {
-                        failedClaims.add(failure)
-                    }
-                }
+                addUniqueFailures(claimFailures, failedClaims, failedClaimKeys)
             }
         }
 
@@ -172,7 +166,18 @@ internal class DcqlEvaluator {
         val failedClaims: List<ClaimFailure>,
         val failureReason: DCQLEvaluationErrorCodes?
     )
-
+    private fun addUniqueFailures(
+        claimFailures: List<ClaimFailure>,
+        failedClaims: MutableList<ClaimFailure>,
+        failedClaimKeys: MutableSet<String>
+    ) {
+        for (failure in claimFailures) {
+            val deduplicationKey = "${failure.reason}:${failure.claim.path.joinToString(".")}"
+            if (failedClaimKeys.add(deduplicationKey)) {
+                failedClaims.add(failure)
+            }
+        }
+    }
     private fun evaluateClaims(
         credentialQuery: CredentialQuery,
         walletCredential: ProcessedCredential

@@ -76,53 +76,61 @@ data class CredentialQuery(
             )
         }
 
-        claims?.let { claimsList ->
-            if (claimsList.isEmpty()) {
-                throw OpenID4VPExceptions.InvalidInput(
-                    listOf("credential_query", "claims"), null, CREDENTIAL_QUERY_CLASS_NAME
-                )
-            }
+        claims?.let { validateClaims(it) }
+        claimSets?.let { validateClaimSets(it) }
+    }
 
-            val claimIds = claimsList.mapNotNull { it.id }
-            if (claimIds.size != claimIds.toSet().size) {
-                throw OpenID4VPExceptions.InvalidData(
-                    "Claim ids must be unique within a Credential Query",
-                    CREDENTIAL_QUERY_CLASS_NAME
-                )
-            }
-
-            for (claim in claimsList) {
-                claim.validate(isClaimSetsAvailable = claimSets != null)
-            }
+    private fun validateClaims(claimsList: List<ClaimsQuery>) {
+        if (claimsList.isEmpty()) {
+            throw OpenID4VPExceptions.InvalidInput(
+                listOf("credential_query", "claims"), null, CREDENTIAL_QUERY_CLASS_NAME
+            )
         }
 
-        claimSets?.let { sets ->
-            if (claims == null) {
+        val claimIds = claimsList.mapNotNull { it.id }
+        if (claimIds.size != claimIds.toSet().size) {
+            throw OpenID4VPExceptions.InvalidData(
+                "Claim ids must be unique within a Credential Query",
+                CREDENTIAL_QUERY_CLASS_NAME
+            )
+        }
+
+        for (claim in claimsList) {
+            claim.validate(isClaimSetsAvailable = claimSets != null)
+        }
+    }
+
+    private fun validateClaimSets(sets: List<List<String>>) {
+        if (claims == null) {
+            throw OpenID4VPExceptions.InvalidData(
+                "claim_sets must not be present when claims is absent",
+                CREDENTIAL_QUERY_CLASS_NAME
+            )
+        }
+        if (sets.isEmpty()) {
+            throw OpenID4VPExceptions.InvalidInput(
+                listOf("credential_query", "claim_sets"), null, CREDENTIAL_QUERY_CLASS_NAME
+            )
+        }
+
+        val validClaimIds = claims.mapNotNull { it.id }.toSet()
+        for (claimSet in sets) {
+            validateClaimSet(claimSet, validClaimIds)
+        }
+    }
+
+    private fun validateClaimSet(claimSet: List<String>, validClaimIds: Set<String>) {
+        if (claimSet.isEmpty()) {
+            throw OpenID4VPExceptions.InvalidInput(
+                listOf("credential_query", "claim_sets"), null, CREDENTIAL_QUERY_CLASS_NAME
+            )
+        }
+        for (claimId in claimSet) {
+            if (!validClaimIds.contains(claimId)) {
                 throw OpenID4VPExceptions.InvalidData(
-                    "claim_sets must not be present when claims is absent",
+                    "claim_sets references unknown claim id '$claimId'",
                     CREDENTIAL_QUERY_CLASS_NAME
                 )
-            }
-            if (sets.isEmpty()) {
-                throw OpenID4VPExceptions.InvalidInput(
-                    listOf("credential_query", "claim_sets"), null, CREDENTIAL_QUERY_CLASS_NAME
-                )
-            }
-            val validClaimIds = claims.mapNotNull { it.id }.toSet()
-            for (claimSet in sets) {
-                if (claimSet.isEmpty()) {
-                    throw OpenID4VPExceptions.InvalidInput(
-                        listOf("credential_query", "claim_sets"), null, CREDENTIAL_QUERY_CLASS_NAME
-                    )
-                }
-                for (claimId in claimSet) {
-                    if (!validClaimIds.contains(claimId)) {
-                        throw OpenID4VPExceptions.InvalidData(
-                            "claim_sets references unknown claim id '$claimId'",
-                            CREDENTIAL_QUERY_CLASS_NAME
-                        )
-                    }
-                }
             }
         }
     }

@@ -20,21 +20,23 @@ import io.mosip.openID4VP.testData.*
 import io.mosip.openID4VP.testData.JWSUtil.Companion.buildTestJwk
 import org.junit.jupiter.api.Test
 import kotlin.test.*
-
+private const val MOCK_CLIENT_ID = "mock-client"
+private const val TEST_CLIENT_ID = "test-client"
+private const val UNTRUSTED_CLIENT_ID = "untrusted-client-id"
 class PreRegisteredSchemeAuthorizationRequestHandlerTest {
 
     private lateinit var authorizationRequestParameters: MutableMap<String, Any>
     private lateinit var walletConfig: WalletConfig
     private val setResponseDispatchInfo: (ResponseDispatchInfo) -> Unit = mockk(relaxed = true)
-    private val validClientId = "mock-client"
+    private val validClientId = MOCK_CLIENT_ID
     private var trustedVerifiers: MutableList<Verifier> = mutableListOf(
         Verifier(
-            "mock-client", listOf(
+            MOCK_CLIENT_ID, listOf(
                 "https://mock-verifier.com/response-uri", "https://verifier.env2.com/responseUri"
             )
         ),
         Verifier(
-            clientId = "test-client",
+            clientId = TEST_CLIENT_ID,
             responseUris = listOf("https://example.com/callback"),
             jwksUri = "https://example.com/.well-known/jwks.json",
             allowUnsignedRequest = false
@@ -84,9 +86,9 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
 
     @Test
     fun `validateClientId should skip validation when validatePreRegisteredVerifier is false`() {
-        authorizationRequestParameters[CLIENT_ID.value] = "untrusted-client-id"
+        authorizationRequestParameters[CLIENT_ID.value] = UNTRUSTED_CLIENT_ID
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
-            "untrusted-client-id",
+            UNTRUSTED_CLIENT_ID,
             SpecVersion.DRAFT_23,
             authorizationRequestParameters,
             walletConfig = WalletConfig(
@@ -108,9 +110,9 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
 
     @Test
     fun `validateClientId should throw exception when client ID is not trusted`() {
-        authorizationRequestParameters[CLIENT_ID.value] = "untrusted-client-id"
+        authorizationRequestParameters[CLIENT_ID.value] = UNTRUSTED_CLIENT_ID
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
-            "untrusted-client-id",
+            UNTRUSTED_CLIENT_ID,
             SpecVersion.DRAFT_23,
             authorizationRequestParameters,
             walletConfig,
@@ -166,7 +168,7 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
     fun `validateAndParseRequestFields should not throw exception when client metadata of the pre-registered verifier is not known and its available in authorization request`() {
         val trustedVerifiersWithoutClientMetadata: List<Verifier> = listOf(
             Verifier(
-                "mock-client",
+                MOCK_CLIENT_ID,
                 listOf(
                     "https://mock-verifier.com/response-uri",
                     "https://verifier.env2.com/responseUri"
@@ -291,11 +293,11 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
     @Test
     fun `should extract key successfully when kid is present`() {
         val testKid = "test-key"
-        authorizationRequestParameters[CLIENT_ID.value] = "test-client"
+        authorizationRequestParameters[CLIENT_ID.value] = TEST_CLIENT_ID
         every { resolveJwksFromUri(any(), any()) } returns Jwks(jwkList)
 
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
-            clientId = "test-client",
+            clientId = TEST_CLIENT_ID,
             specVersion = SpecVersion.DRAFT_23,
             authorizationRequestParameters = authorizationRequestParameters,
             walletConfig = walletConfig,
@@ -315,11 +317,11 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
     fun `should throw when kid is present and not found in client metadata`() {
         val testKid = "some-other-key"
         val testJwk = buildTestJwk(kid = testKid)
-        authorizationRequestParameters[CLIENT_ID.value] = "test-client"
+        authorizationRequestParameters[CLIENT_ID.value] = TEST_CLIENT_ID
         every { resolveJwksFromUri(any(), any()) } returns Jwks(listOf(testJwk))
 
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
-            clientId = "test-client",
+            clientId = TEST_CLIENT_ID,
             specVersion = SpecVersion.DRAFT_23,
             authorizationRequestParameters = authorizationRequestParameters,
             walletConfig = walletConfig,
@@ -336,10 +338,10 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
 
     @Test
     fun `should throw error when no jwks_uri available in the trusted verifier`() {
-        authorizationRequestParameters[CLIENT_ID.value] = "mock-client" // this client does not have jwks_uri as per trustedVerifiers
+        authorizationRequestParameters[CLIENT_ID.value] = MOCK_CLIENT_ID // this client does not have jwks_uri as per trustedVerifiers
 
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
-            clientId = "mock-client",
+            clientId = MOCK_CLIENT_ID,
             specVersion = SpecVersion.DRAFT_23,
             authorizationRequestParameters = authorizationRequestParameters,
             walletConfig = WalletConfig(trustedVerifiers = trustedVerifiers),
@@ -357,11 +359,11 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
     @Test
     fun `should pick key by alg if no kid and one matching key present`() {
         val testJwk: Jwk = buildTestJwk(kid = null)
-        authorizationRequestParameters[CLIENT_ID.value] = "test-client"
+        authorizationRequestParameters[CLIENT_ID.value] = TEST_CLIENT_ID
         every { resolveJwksFromUri(any(), any()) } returns Jwks(listOf(testJwk))
 
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
-            clientId = "test-client",
+            clientId = TEST_CLIENT_ID,
             specVersion = SpecVersion.DRAFT_23,
             authorizationRequestParameters = authorizationRequestParameters,
             walletConfig = walletConfig,
@@ -377,12 +379,12 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
     fun `should throw if multiple sig-use keys present and no kid`() {
         val key1 = buildTestJwk(kid = "k1")
         val key2 = buildTestJwk(kid = "k2")
-        authorizationRequestParameters[CLIENT_ID.value] = "test-client"
+        authorizationRequestParameters[CLIENT_ID.value] = TEST_CLIENT_ID
         every { resolveJwksFromUri(any(), any()) } returns Jwks(listOf(key1, key2))
 
 
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
-            clientId = "test-client",
+            clientId = TEST_CLIENT_ID,
             specVersion = SpecVersion.DRAFT_23,
             authorizationRequestParameters = authorizationRequestParameters,
             walletConfig = walletConfig,
@@ -400,12 +402,12 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
     @Test
     fun `should throw if no matching keys for alg`() {
         val key = buildTestJwk(kty = "RSA", crv = "") // non-EdDSA key
-        authorizationRequestParameters[CLIENT_ID.value] = "test-client"
+        authorizationRequestParameters[CLIENT_ID.value] = TEST_CLIENT_ID
         every { resolveJwksFromUri(any(), any()) } returns Jwks(listOf(key))
 
 
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
-            clientId = "test-client",
+            clientId = TEST_CLIENT_ID,
             specVersion = SpecVersion.DRAFT_23,
             authorizationRequestParameters = authorizationRequestParameters,
             walletConfig = WalletConfig(trustedVerifiers = trustedVerifiers),
@@ -423,11 +425,11 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
     @Test
     fun `should throw if curve is unsupported in matching key`() {
         val unsupportedCurveJWK = buildTestJwk(crv = "XYZ")
-        authorizationRequestParameters[CLIENT_ID.value] = "test-client"
+        authorizationRequestParameters[CLIENT_ID.value] = TEST_CLIENT_ID
         every { resolveJwksFromUri(jwksUri, any()) } returns Jwks(listOf(unsupportedCurveJWK))
 
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
-            clientId = "test-client",
+            clientId = TEST_CLIENT_ID,
             specVersion = SpecVersion.DRAFT_23,
             authorizationRequestParameters = authorizationRequestParameters,
             walletConfig = WalletConfig(trustedVerifiers = trustedVerifiers),
@@ -493,15 +495,15 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
     @Test
     fun `isRequestObjectSupported should return false when verifier does not allow unsigned request`() {
         val verifier = Verifier(
-            clientId = "test-client",
+            clientId = TEST_CLIENT_ID,
             jwksUri = jwksUri,
             allowUnsignedRequest = false,
             responseUris = listOf("https://example.com/response")
         )
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
-            clientId = "test-client",
+            clientId = TEST_CLIENT_ID,
             specVersion = SpecVersion.DRAFT_23,
-            authorizationRequestParameters = authorizationRequestParameters.apply { put(CLIENT_ID.value, "test-client") },
+            authorizationRequestParameters = authorizationRequestParameters.apply { put(CLIENT_ID.value, TEST_CLIENT_ID) },
             walletConfig = WalletConfig(trustedVerifiers = listOf(verifier)),
             setResponseDispatchInfo = setResponseDispatchInfo,
             walletNonce = walletNonce
@@ -512,15 +514,15 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
     @Test
     fun `isRequestObjectSupported should return true when verifier allows unsigned request`() {
         val verifier = Verifier(
-            clientId = "test-client",
+            clientId = TEST_CLIENT_ID,
             jwksUri = jwksUri,
             allowUnsignedRequest = true,
             responseUris = listOf("https://example.com/response")
         )
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
-            clientId = "test-client",
+            clientId = TEST_CLIENT_ID,
             specVersion = SpecVersion.DRAFT_23,
-            authorizationRequestParameters = authorizationRequestParameters.apply { put(CLIENT_ID.value, "test-client") },
+            authorizationRequestParameters = authorizationRequestParameters.apply { put(CLIENT_ID.value, TEST_CLIENT_ID) },
             walletConfig = WalletConfig(trustedVerifiers = listOf(verifier)),
             setResponseDispatchInfo = setResponseDispatchInfo,
             walletNonce = walletNonce

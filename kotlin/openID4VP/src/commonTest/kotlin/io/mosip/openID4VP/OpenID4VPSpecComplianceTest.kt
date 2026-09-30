@@ -11,6 +11,8 @@ import io.mosip.openID4VP.networkManager.NetworkResponse
 import io.mosip.openID4VP.testData.*
 import kotlin.test.*
 
+private const val WALLET_NONCE_STATE_TEST_ID = "wallet-nonce-state-test"
+private const val AUTHORIZE_REQUEST_URL = "openid4vp://authorize?request=test"
 /**
  * Tests for OpenID4VP.kt changes from PR #111:
  * - Wallet nonce regeneration per call
@@ -31,7 +33,7 @@ class OpenID4VPWalletNonceAndStateResetTest {
         every { decodeFromBase64Url(any()) } answers { java.util.Base64.getUrlDecoder().decode(firstArg<String>()) }
         mockkObject(NetworkManagerClient)
         mockkObject(AuthorizationRequest)
-        openID4VP = OpenID4VP("wallet-nonce-state-test")
+        openID4VP = OpenID4VP(WALLET_NONCE_STATE_TEST_ID)
     }
 
     @AfterTest
@@ -170,7 +172,7 @@ class OpenID4VPWalletNonceAndStateResetTest {
             )
         } returns authorizationPresentationExchangeRequest
 
-        openID4VP.authenticateVerifier("openid4vp://authorize?request=test")
+        openID4VP.authenticateVerifier( AUTHORIZE_REQUEST_URL)
 
         val currentDispatchInfo = getFieldValue(openID4VP, "responseDispatchInfo")
         assertNotEquals(testDispatchInfo("https://old-uri.com"), currentDispatchInfo)
@@ -200,7 +202,7 @@ class OpenID4VPWalletNonceAndStateResetTest {
             )
         } returns authorizationPresentationExchangeRequest
 
-        openID4VP.authenticateVerifier("openid4vp://authorize?request=test")
+        openID4VP.authenticateVerifier( AUTHORIZE_REQUEST_URL)
 
         verify {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
@@ -217,9 +219,9 @@ class OpenID4VPWalletNonceAndStateResetTest {
             )
         } returns authorizationPresentationExchangeRequest
 
-        openID4VP = OpenID4VP("wallet-nonce-state-test", WalletConfig(validateTrustedVerifier = false))
+        openID4VP = OpenID4VP(WALLET_NONCE_STATE_TEST_ID, WalletConfig(validateTrustedVerifier = false))
         openID4VP.authenticateVerifier(
-            "openid4vp://authorize?request=test"
+            AUTHORIZE_REQUEST_URL
         )
 
         verify {
@@ -237,7 +239,7 @@ class OpenID4VPWalletNonceAndStateResetTest {
             )
         } returns authorizationPresentationExchangeRequest
 
-        openID4VP = OpenID4VP("wallet-nonce-state-test", WalletConfig(validateTrustedVerifier = false))
+        openID4VP = OpenID4VP(WALLET_NONCE_STATE_TEST_ID, WalletConfig(validateTrustedVerifier = false))
         openID4VP.authenticateVerifier(
             mapOf("client_id" to "test" as Any)
         )

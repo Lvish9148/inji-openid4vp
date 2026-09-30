@@ -44,6 +44,9 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
+private const val INPUT_DESCRIPTOR_ID1 = "input-descriptor-id1"
+private const val INPUT_DESCRIPTOR_ID2 = "input-descriptor-id2"
+
 class UnsignedMdocVPTokenBuilderTest {
     private val secondMdocCredential = "second_mdoc_credential"
     private lateinit var firstDecodedMap: Map
@@ -108,12 +111,12 @@ class UnsignedMdocVPTokenBuilderTest {
             CredentialInputDescriptorMapping(
                 FormatType.MSO_MDOC,
                 mdocCredential,
-                "input-descriptor-id1"
+                INPUT_DESCRIPTOR_ID1
             ),
             CredentialInputDescriptorMapping(
                 FormatType.MSO_MDOC,
                 secondMdocCredential,
-                "input-descriptor-id2"
+                INPUT_DESCRIPTOR_ID2
             )
         )
         val result = UnsignedMdocVPTokenBuilder(
@@ -155,7 +158,7 @@ class UnsignedMdocVPTokenBuilderTest {
             CredentialInputDescriptorMapping(
                 FormatType.MSO_MDOC,
                 "invalid_mdoc_credential",
-                "input-descriptor-id1"
+                INPUT_DESCRIPTOR_ID1
             )
         )
         val exception = assertFailsWith<IllegalArgumentException> {
@@ -178,12 +181,12 @@ class UnsignedMdocVPTokenBuilderTest {
             CredentialInputDescriptorMapping(
                 FormatType.MSO_MDOC,
                 mdocCredential,
-                "input-descriptor-id1"
+                INPUT_DESCRIPTOR_ID1
             ),
             CredentialInputDescriptorMapping(
                 FormatType.MSO_MDOC,
                 secondMdocCredential,
-                "input-descriptor-id2"
+                INPUT_DESCRIPTOR_ID2
             )
         )
         UnsignedMdocVPTokenBuilder(
@@ -205,12 +208,12 @@ class UnsignedMdocVPTokenBuilderTest {
             CredentialInputDescriptorMapping(
                 FormatType.MSO_MDOC,
                 mdocCredential,
-                "input-descriptor-id1"
+                INPUT_DESCRIPTOR_ID1
             ),
             CredentialInputDescriptorMapping(
                 FormatType.MSO_MDOC,
                 secondMdocCredential,
-                "input-descriptor-id2"
+                INPUT_DESCRIPTOR_ID2
             ),
         )
         UnsignedMdocVPTokenBuilder(

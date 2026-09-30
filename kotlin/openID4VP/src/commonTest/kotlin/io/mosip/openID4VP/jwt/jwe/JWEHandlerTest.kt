@@ -9,7 +9,7 @@ import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.openID4VP.jwt.jwe.encryption.EncryptionProvider
 import io.mosip.openID4VP.testData.clientMetadataString
 import kotlin.test.*
-
+private const val ECDH_ES = "ECDH-ES"
 class JWEHandlerTest {
 
     private lateinit var clientMetadata: ClientMetadataDraft23
@@ -23,7 +23,7 @@ class JWEHandlerTest {
         clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataDraft23Serializer)
         publicKey = clientMetadata.jwks!!.keys[1]
         jweHandler = JWEHandler(
-            "ECDH-ES",
+            ECDH_ES,
             "A256GCM",
             publicKey,
             walletNonce,
@@ -55,7 +55,7 @@ class JWEHandlerTest {
         mockkObject(EncryptionProvider)
         every { EncryptionProvider.getEncrypter(any()) } throws RuntimeException("Key agreement failed")
 
-        val handler = JWEHandler("ECDH-ES", "A256GCM", publicKey, walletNonce, verifierNonce)
+        val handler = JWEHandler(ECDH_ES, "A256GCM", publicKey, walletNonce, verifierNonce)
         val exception = assertFailsWith<OpenID4VPExceptions> {
             handler.generateEncryptedResponse(payload)
         }
@@ -70,7 +70,7 @@ class JWEHandlerTest {
         mockkObject(EncryptionProvider)
         every { EncryptionProvider.getEncrypter(any()) } throws RuntimeException("Encryption error")
 
-        val handler = JWEHandler("ECDH-ES", "A256GCM", publicKey, walletNonce, verifierNonce)
+        val handler = JWEHandler(ECDH_ES, "A256GCM", publicKey, walletNonce, verifierNonce)
         val exception = assertFailsWith<OpenID4VPExceptions.JweEncryptionFailure> {
             handler.generateEncryptedResponse(payload)
         }
@@ -93,7 +93,7 @@ class JWEHandlerTest {
     @Test
     fun `should throw UnsupportedOperationException when contentEncryptionAlg is unsupported`() {
         val payload = mapOf("key1" to "value1")
-        val handler = JWEHandler("ECDH-ES", "A128GCM", publicKey, walletNonce, verifierNonce)
+        val handler = JWEHandler(ECDH_ES, "A128GCM", publicKey, walletNonce, verifierNonce)
         
         val exception = assertFailsWith<OpenID4VPExceptions.UnsupportedOperationException> {
             handler.generateEncryptedResponse(payload)
@@ -103,3 +103,4 @@ class JWEHandlerTest {
         assertTrue(exception.message.contains(expectedMessage))
     }
 }
+

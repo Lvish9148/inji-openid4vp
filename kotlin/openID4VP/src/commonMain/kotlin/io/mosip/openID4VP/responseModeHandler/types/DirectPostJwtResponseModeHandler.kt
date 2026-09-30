@@ -24,17 +24,17 @@ import io.mosip.openID4VP.responseModeHandler.ResponseDispatchInfo
 import io.mosip.openID4VP.responseModeHandler.ResponseEncryptionSpecification
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandler
 
+private const val CLIENT_METADATA_REQUIRED_MESSAGE = "client_metadata must be present for given response mode"
 private val className = DirectPostJwtResponseModeHandler::class.simpleName!!
 
 class DirectPostJwtResponseModeHandler : ResponseModeBasedHandler() {
-
     override fun validate(
         clientMetadata: ClientMetadataDraft23?,
         walletConfig: WalletConfig,
         shouldValidateWithWalletMetadata: Boolean
     ): ResponseEncryptionSpecification {
         requireNotNull(clientMetadata) {
-            throwInvalidDataException("client_metadata must be present for given response mode")
+            throwInvalidDataException(CLIENT_METADATA_REQUIRED_MESSAGE)
         }
 
         val alg = clientMetadata.authorizationEncryptedResponseAlg
@@ -63,7 +63,7 @@ class DirectPostJwtResponseModeHandler : ResponseModeBasedHandler() {
         shouldValidateWithWalletMetadata: Boolean
     ): ResponseEncryptionSpecification {
         requireNotNull(clientMetadata) {
-            throwInvalidDataException("client_metadata must be present for given response mode")
+            throwInvalidDataException(CLIENT_METADATA_REQUIRED_MESSAGE)
         }
 
         val encValues = clientMetadata.encryptedResponseEncValuesSupported
@@ -259,7 +259,7 @@ class DirectPostJwtResponseModeHandler : ResponseModeBasedHandler() {
                     val clientMetadata =
                         (authorizationRequest as? AuthorizationDcqlRequest)?.clientMetadata
                             ?: throw OpenID4VPExceptions.InvalidData(
-                                "client_metadata must be present for given response mode",
+                                CLIENT_METADATA_REQUIRED_MESSAGE,
                                 className
                             )
                     val verifierJwks = clientMetadata.jwks

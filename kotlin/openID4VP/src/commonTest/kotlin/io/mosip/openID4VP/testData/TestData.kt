@@ -43,6 +43,11 @@ import io.mosip.openID4VP.constants.SignatureAlgorithm
 import io.mosip.openID4VP.constants.SpecVersion
 import io.mosip.openID4VP.constants.VPFormatType
 import java.security.PublicKey
+private const val RANDOM_UUID = "random-uuid"
+private const val TYPE_PATH = "$.type"
+private const val MOCK_VERIFIER = "https://mock-verifier.com"
+private const val TEST_KEY_1 = "VbRRB/LTxLiXmVNZuyMO8A=="
+private const val TEST_KEY_2 = "bMHvX1HGhbh8zqlSWf/fuQ=="
 
 const val requestUrl = "https://mock-verifier.com/verifier/get-auth-request-obj"
 const val responseUrl = "https://mock-verifier.com/response-uri"
@@ -76,7 +81,7 @@ const val jws =
 
 val unsignedLdpVPToken: List<UnsignedVPToken> = listOf(
     UnsignedVPToken(
-        id = "random-uuid",
+        id = RANDOM_UUID,
         format = FormatType.LDP_VC,
         holderKeyReference = "did:example:holder",
         signatureAlgorithm = signatureSuite,
@@ -89,7 +94,7 @@ val mdocDocTypeToDeviceAuthBytes: Map<String, ByteArray> = mapOf(
 )
 val unsignedMdocVPToken: List<UnsignedVPToken> = listOf(
     UnsignedVPToken(
-        id = "random-uuid",
+        id = RANDOM_UUID,
         format = FormatType.MSO_MDOC,
         holderKeyReference = "mdocKeyRef",
         signatureAlgorithm = "ES256",
@@ -98,14 +103,14 @@ val unsignedMdocVPToken: List<UnsignedVPToken> = listOf(
 )
 val unsignedSdJwtVPToken: List<UnsignedVPToken> = listOf(
     UnsignedVPToken(
-        id = "random-uuid",
+        id = RANDOM_UUID,
         format = FormatType.VC_SD_JWT,
         holderKeyReference = "kid123",
         signatureAlgorithm = "ES256K",
         dataToSign = "unsignedKBT1".toByteArray()
     ),
     UnsignedVPToken(
-        id = "random-uuid",
+        id = RANDOM_UUID,
         format = FormatType.VC_SD_JWT,
         holderKeyReference = "kid456",
         signatureAlgorithm = "ES256K",
@@ -222,7 +227,7 @@ val presentationDefinitionMap = mapOf(
             "constraints" to mapOf(
                 "fields" to listOf(
                     mapOf(
-                        "path" to listOf("$.type")
+                        "path" to listOf(TYPE_PATH)
                     )
                 )
             )
@@ -244,7 +249,7 @@ val presentationDefinitionMapWithSdJwt = mapOf(
             "constraints" to mapOf(
                 "fields" to listOf(
                     mapOf(
-                        "path" to listOf("$.type"),
+                        "path" to listOf(TYPE_PATH),
                     )
                 )
             )
@@ -257,7 +262,7 @@ val presentationDefinitionMapWithSdJwt = mapOf(
             "constraints" to mapOf(
                 "fields" to listOf(
                     mapOf(
-                        "path" to listOf("$.type"),
+                        "path" to listOf(TYPE_PATH),
                         "filter" to mapOf(
                             "type" to "string",
                             "pattern" to ".*"
@@ -276,7 +281,7 @@ val presentationDefinitionMapWithSdJwt = mapOf(
             "constraints" to mapOf(
                 "fields" to listOf(
                     mapOf(
-                        "path" to listOf("$.type"),
+                        "path" to listOf(TYPE_PATH),
                         "filter" to mapOf(
                             "type" to "string",
                             "pattern" to ".*"
@@ -306,7 +311,7 @@ val presentationDefinitionString = """
             "fields": [
               {
                 "path": [
-                  "$.type"
+                  "$TYPE_PATH"
                 ]
               }
             ]
@@ -406,7 +411,7 @@ val authRequestWithDidByValue = listOf(
 )
 
 val requestParams: MutableMap<String, String> = mapOf(
-    REDIRECT_URI.value to "https://mock-verifier.com",
+    REDIRECT_URI.value to MOCK_VERIFIER,
     RESPONSE_URI.value to responseUrl,
     REQUEST_URI.value to requestUrl,
     REQUEST_URI_METHOD.value to "get",
@@ -414,7 +419,7 @@ val requestParams: MutableMap<String, String> = mapOf(
     PRESENTATION_DEFINITION_URI.value to "https://mock-verifier.com/verifier/get-presentation-definition",
     RESPONSE_TYPE.value to "vp_token",
     RESPONSE_MODE.value to "direct_post",
-    NONCE.value to "VbRRB/LTxLiXmVNZuyMO8A==",
+    NONCE.value to TEST_KEY_1,
     STATE.value to "+mRQe1d6pBoJqF6Ab28klg==",
     CLIENT_METADATA.value to clientMetadataString
 ).toMutableMap()
@@ -453,26 +458,26 @@ val authorizationRequestForResponseModeJWT = AuthorizationPresentationExchangeRe
     ),
     responseUri = responseUrl,
     redirectUri = null,
-    nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
+    nonce = TEST_KEY_2,
     state = "fsnC8ixCs6mWyV+00k23Qg==",
     clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataDraft23Serializer),
-    walletNonce = "VbRRB/LTxLiXmVNZuyMO8A=="
+    walletNonce = TEST_KEY_1
 )
 
 val authorizationPresentationExchangeRequest = AuthorizationPresentationExchangeRequest(
-    clientId = "https://mock-verifier.com",
+    clientId = MOCK_VERIFIER,
     responseType = "vp_token",
     responseMode = "direct_post",
     presentationDefinition = deserializeAndValidate(
         presentationDefinitionMap,
         PresentationDefinitionSerializer
     ),
-    responseUri = "https://mock-verifier.com",
+    responseUri = MOCK_VERIFIER,
     redirectUri = null,
-    nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
+    nonce = TEST_KEY_2,
     state = "fsnC8ixCs6mWyV+00k23Qg==",
     clientMetadata = deserializeAndValidate(clientMetadataMap, ClientMetadataDraft23Serializer),
-    walletNonce = "VbRRB/LTxLiXmVNZuyMO8A=="
+    walletNonce = TEST_KEY_1
 )
 
 fun createAuthorizationRequestWithState(state: String?): AuthorizationPresentationExchangeRequest {
@@ -493,7 +498,7 @@ fun createAuthorizationRequestWithState(state: String?): AuthorizationPresentati
 val proof = Proof(
     type = "RsaSignature2018",
     created = "2024-02-13T10:00:00Z",
-    challenge = "bMHvX1HGhbh8zqlSWf/fuQ==",
+    challenge = TEST_KEY_2,
     domain = "https://123",
     proofValue = jws,
     proofPurpose = "authentication",

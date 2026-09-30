@@ -12,6 +12,7 @@ import co.nstant.`in`.cbor.model.SinglePrecisionFloat
 import co.nstant.`in`.cbor.model.UnicodeString
 import co.nstant.`in`.cbor.model.UnsignedInteger
 import io.mockk.every
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mosip.openID4VP.common.decodeCbor
@@ -23,6 +24,7 @@ import io.mosip.openID4VP.common.taggedCbor24
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.common.OpenID4VPErrorCodes
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
+import io.mosip.openID4VP.common.MdocCredentialUtils
 import io.mosip.openID4VP.testData.assertOpenId4VPException
 import io.mosip.openID4VP.wallet.Credential
 import java.util.Base64
@@ -33,6 +35,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+
+private const val CRED_1 = "cred-1"
 
 class DCQLEvaluatorUtilsTest {
 
@@ -56,7 +60,7 @@ class DCQLEvaluatorUtilsTest {
     @Test
     fun `expandCredentialTag throws when ldp credential data is not map`() {
         val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
-            expandCredentialTag(Credential(FormatType.LDP_VC, "invalid", "cred-1"))
+            expandCredentialTag(Credential(FormatType.LDP_VC, "invalid", CRED_1))
         }
         assertEquals("Credential data is not in the expected format", exception.message)
     }
@@ -64,15 +68,31 @@ class DCQLEvaluatorUtilsTest {
     @Test
     fun `expandCredentialTag throws when mdoc credential is not string`() {
         val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
-            expandCredentialTag(Credential(FormatType.MSO_MDOC, mapOf("docType" to "x"), "cred-1"))
+            expandCredentialTag(Credential(FormatType.MSO_MDOC, mapOf("docType" to "x"), CRED_1))
         }
         assertEquals("MDOC credential is not a String", exception.message)
     }
 
     @Test
+    fun `expandCredentialTag throws when mdoc docType is missing`() {
+        try {
+            mockkObject(MdocCredentialUtils)
+            every { MdocCredentialUtils.getMdocDocType(any(), any()) } throws
+                    OpenID4VPExceptions.InvalidData("docType missing or invalid in credential", "DCQLUtils")
+
+            val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
+                expandCredentialTag(Credential(FormatType.MSO_MDOC, "mock-mdoc", CRED_1))
+            }
+            assertEquals("docType missing or invalid in credential", exception.message)
+        } finally {
+            unmockkAll()
+        }
+    }
+
+    @Test
     fun `expandCredentialTag throws when sd-jwt credential is not string`() {
         val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
-            expandCredentialTag(Credential(FormatType.VC_SD_JWT, 123, "cred-1"))
+            expandCredentialTag(Credential(FormatType.VC_SD_JWT, 123, CRED_1))
         }
         assertEquals("SD-JWT credential is not a String", exception.message)
     }
@@ -81,8 +101,8 @@ class DCQLEvaluatorUtilsTest {
     fun `convertToProcessedCredentials throws when ldp credential data is not map`() {
         val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
             convertToProcessedCredentials(
-                listOf("cred-1"),
-                mapOf("cred-1" to Credential(FormatType.LDP_VC, "invalid", "cred-1"))
+                listOf(CRED_1),
+                mapOf(CRED_1 to Credential(FormatType.LDP_VC, "invalid", CRED_1))
             )
         }
         assertEquals("Credential data is not in the expected format", exception.message)
@@ -92,8 +112,8 @@ class DCQLEvaluatorUtilsTest {
     fun `convertToProcessedCredentials throws when mdoc credential is not string`() {
         val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
             convertToProcessedCredentials(
-                listOf("cred-1"),
-                mapOf("cred-1" to Credential(FormatType.MSO_MDOC, mapOf("docType" to "x"), "cred-1"))
+                listOf(CRED_1),
+                mapOf(CRED_1 to Credential(FormatType.MSO_MDOC, mapOf("docType" to "x"), CRED_1))
             )
         }
         assertEquals("MDOC credential is not a String", exception.message)
@@ -103,8 +123,8 @@ class DCQLEvaluatorUtilsTest {
     fun `convertToProcessedCredentials throws when sd-jwt credential is not string`() {
         val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
             convertToProcessedCredentials(
-                listOf("cred-1"),
-                mapOf("cred-1" to Credential(FormatType.VC_SD_JWT, false, "cred-1"))
+                listOf(CRED_1),
+                mapOf(CRED_1 to Credential(FormatType.VC_SD_JWT, false, CRED_1))
             )
         }
         assertEquals("SD-JWT credential is not a String", exception.message)
@@ -700,3 +720,4 @@ class DCQLEvaluatorUtilsTest {
         return (listOf("$header.$encodedPayload.signature") + disclosures).joinToString("~")
     }
 }
+

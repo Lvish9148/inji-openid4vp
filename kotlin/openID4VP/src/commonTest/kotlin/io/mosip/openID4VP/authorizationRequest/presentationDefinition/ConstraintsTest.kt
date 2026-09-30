@@ -9,11 +9,14 @@ class ConstraintsTest {
 
 	@BeforeTest
 	fun setUp() {
-
+			// Intentionally empty: each test builds its own mocks and input JSON inline,
+			// so there is no shared state to initialize before a test runs.
+			// Kept for symmetry with tearDown(), which does need to reset mocks afterward.
 	}
 
 	@AfterTest
 	fun tearDown() {
+		// Reset mocks created inline within each test so they don't leak into the next one.
 		clearAllMocks()
 	}
 

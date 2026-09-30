@@ -17,6 +17,10 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
+private const val DID_WEB_CLIENT_ID = "decentralized_identifier:did:web:example.com"
+private const val UNKNOWN_PREFIX_CLIENT_ID = "foo:bar"
+private const val VERIFIER_EXAMPLE_URL = "https://verifier.example.com"
+private const val MY_CLIENT_ID = "my-client"
 /**
  * Tests for AuthorizationRequestUtils.kt changes from PR #111:
  * - extractClientIdPrefix: infers prefix from client_id format
@@ -51,7 +55,7 @@ class AuthorizationRequestUtilsTest {
 
     @Test
     fun `extractClientIdPrefix returns decentralized_identifier when client_id starts with that prefix`() {
-        val params = mapOf<String, Any>("client_id" to "decentralized_identifier:did:web:example.com")
+        val params = mapOf<String, Any>("client_id" to DID_WEB_CLIENT_ID)
         val result = extractClientIdPrefix(params)
         assertEquals(ClientIdPrefix.DECENTRALIZED_IDENTIFIER.value, result)
     }
@@ -65,14 +69,14 @@ class AuthorizationRequestUtilsTest {
 
     @Test
     fun `extractClientIdPrefix returns pre-registered when client_id has unrecognized prefix`() {
-        val params = mapOf<String, Any>("client_id" to "foo:bar")
+        val params = mapOf<String, Any>("client_id" to UNKNOWN_PREFIX_CLIENT_ID)
         val result = extractClientIdPrefix(params)
         assertEquals(ClientIdPrefix.PRE_REGISTERED.value, result)
     }
 
     @Test
     fun `extractClientIdPrefix returns pre-registered when client_id starts with URL scheme`() {
-        val params = mapOf<String, Any>("client_id" to "https://verifier.example.com")
+        val params = mapOf<String, Any>("client_id" to VERIFIER_EXAMPLE_URL)
         val result = extractClientIdPrefix(params)
         assertEquals(ClientIdPrefix.PRE_REGISTERED.value, result)
     }
@@ -102,7 +106,7 @@ class AuthorizationRequestUtilsTest {
 
     @Test
     fun `extractClientIdPartOnly returns DID URL after stripping decentralized_identifier prefix`() {
-        val params = mapOf<String, Any>("client_id" to "decentralized_identifier:did:web:example.com")
+        val params = mapOf<String, Any>("client_id" to DID_WEB_CLIENT_ID)
         val result = extractClientIdPartOnly(params)
         // For V1 decentralized_identifier prefix, strip the prefix to get actual DID URL
         assertEquals("did:web:example.com", result)
@@ -117,16 +121,16 @@ class AuthorizationRequestUtilsTest {
 
     @Test
     fun `extractClientIdPartOnly returns full client_id for unrecognized prefix`() {
-        val params = mapOf<String, Any>("client_id" to "foo:bar")
+        val params = mapOf<String, Any>("client_id" to UNKNOWN_PREFIX_CLIENT_ID)
         val result = extractClientIdPartOnly(params)
-        assertEquals("foo:bar", result)
+        assertEquals(UNKNOWN_PREFIX_CLIENT_ID, result)
     }
 
     @Test
     fun `extractClientIdPartOnly returns full client_id for URL scheme`() {
-        val params = mapOf<String, Any>("client_id" to "https://verifier.example.com")
+        val params = mapOf<String, Any>("client_id" to VERIFIER_EXAMPLE_URL)
         val result = extractClientIdPartOnly(params)
-        assertEquals("https://verifier.example.com", result)
+        assertEquals(VERIFIER_EXAMPLE_URL, result)
     }
 
     // === findSpecVersionUsingRequestParameters ===
@@ -198,11 +202,11 @@ class AuthorizationRequestUtilsTest {
     @Test
     fun `findSpecVersion returns V1 for decentralized_identifier prefix`() {
         val params = mapOf<String, Any>(
-            "client_id" to "decentralized_identifier:did:web:example.com",
+            "client_id" to DID_WEB_CLIENT_ID,
             "request_uri" to "https://example.com/request"
         )
         val result = findSpecVersionUsingClientId(
-            clientId = "decentralized_identifier:did:web:example.com",
+            clientId = DID_WEB_CLIENT_ID,
             clientIdPrefix = ClientIdPrefix.DECENTRALIZED_IDENTIFIER.value,
             trustedVerifiers = emptyList()
         )
@@ -212,11 +216,11 @@ class AuthorizationRequestUtilsTest {
     @Test
     fun `findSpecVersion returns trustedVerifier specVersion for pre-registered when verifier found`() {
         val verifiers = listOf(
-            Verifier("my-client", listOf("https://example.com/response"), specVersion = SpecVersion.DRAFT_23)
+            Verifier(MY_CLIENT_ID, listOf("https://example.com/response"), specVersion = SpecVersion.DRAFT_23)
         )
-        val params = mapOf<String, Any>("client_id" to "my-client")
+        val params = mapOf<String, Any>("client_id" to MY_CLIENT_ID)
         val result = findSpecVersionUsingClientId(
-            clientId = "my-client",
+            clientId = MY_CLIENT_ID,
             clientIdPrefix = ClientIdPrefix.PRE_REGISTERED.value,
             trustedVerifiers = verifiers
         )

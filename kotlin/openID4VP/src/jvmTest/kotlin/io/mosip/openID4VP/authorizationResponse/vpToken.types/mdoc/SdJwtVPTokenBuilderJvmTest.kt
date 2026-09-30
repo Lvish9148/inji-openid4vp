@@ -14,6 +14,11 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+private const val ID_123 = "id-123"
+private const val UUID_Z = "uuid-z"
+private const val UUID_A = "uuid-a"
+private const val UUID_1 = "uuid-1"
+private const val UUID_2 = "uuid-2"
 
 class SdJwtVPTokenBuilderJvmTest {
 
@@ -40,7 +45,7 @@ class SdJwtVPTokenBuilderJvmTest {
         ))
         val builder = SdJwtVPTokenBuilder()
 
-        val element = CredentialInputDescriptorMapping(FormatType.VC_SD_JWT, sampleSdJwt, "id-123")
+        val element = CredentialInputDescriptorMapping(FormatType.VC_SD_JWT, sampleSdJwt, ID_123)
         element.identifier = uuid
         val (vpTokens, descriptorMaps, nextIndex) = builder.build(
             listOf(element),
@@ -67,7 +72,7 @@ class SdJwtVPTokenBuilderJvmTest {
                     CredentialInputDescriptorMapping(
                         FormatType.VC_SD_JWT,
                         sdJwtCredential1,
-                        "id-123"
+                        ID_123
                     ).apply { identifier = uuid }
                 ),
                 Pair(
@@ -94,25 +99,25 @@ class SdJwtVPTokenBuilderJvmTest {
         val signatureZ = "signature-z".toByteArray()
         val signatureA = "signature-a".toByteArray()
         val credentialInputDescriptorMappings = listOf(
-            CredentialInputDescriptorMapping(FormatType.VC_SD_JWT, "credential-z~", "id-z").apply { identifier = "uuid-z" },
-            CredentialInputDescriptorMapping(FormatType.VC_SD_JWT, "credential-a~", "id-a").apply { identifier = "uuid-a" },
+            CredentialInputDescriptorMapping(FormatType.VC_SD_JWT, "credential-z~", "id-z").apply { identifier = UUID_Z },
+            CredentialInputDescriptorMapping(FormatType.VC_SD_JWT, "credential-a~", "id-a").apply { identifier = UUID_A },
             CredentialInputDescriptorMapping(FormatType.VC_SD_JWT, "credential-m~", "id-m").apply { identifier = "uuid-m" },
         )
         val unsignedVPTokenResult = Pair(
             mapOf(
-                "uuid-z" to "unsigned-kb-jwt-z",
-                "uuid-a" to "unsigned-kb-jwt-a"
+                UUID_Z to "unsigned-kb-jwt-z",
+                UUID_A to "unsigned-kb-jwt-a"
             ),
             listOf(
                 UnsignedVPToken(
-                    "uuid-z",
+                    UUID_Z,
                     FormatType.VC_SD_JWT,
                     "kid-z",
                     "ES256K",
                     "unsigned-kb-jwt-z".toByteArray(Charsets.UTF_8)
                 ),
                 UnsignedVPToken(
-                    "uuid-a",
+                    UUID_A,
                     FormatType.VC_SD_JWT,
                     "kid-a",
                     "ES256K",
@@ -121,8 +126,8 @@ class SdJwtVPTokenBuilderJvmTest {
             )
         )
         val vpTokenSigningResults = listOf(
-            VPTokenSigningResult(id = "uuid-a", signedData = signatureZ),
-            VPTokenSigningResult(id = "uuid-z", signedData = signatureA)
+            VPTokenSigningResult(id = UUID_A, signedData = signatureZ),
+            VPTokenSigningResult(id = UUID_Z, signedData = signatureA)
         )
 
         val (vpTokens, descriptorMaps, nextRootIndex) = SdJwtVPTokenBuilder().build(
@@ -145,14 +150,14 @@ class SdJwtVPTokenBuilderJvmTest {
         val sig1 = "aHR0cHM6Ly93M2lkLm9yZy9zZWN1cml0eS9zdWl0ZXMvandzLTIwMjAvdjE".toByteArray()
         val sig2 = "kb-jwt-signature-2".toByteArray()
         val credentialInputDescriptorMappings = listOf(
-            CredentialInputDescriptorMapping(FormatType.VC_SD_JWT, sdJwtCredential2, "id-123").apply { identifier = "uuid-1" },
-            CredentialInputDescriptorMapping(FormatType.VC_SD_JWT, sdJwtCredential1, "id-456").apply { identifier = "uuid-2" },
+            CredentialInputDescriptorMapping(FormatType.VC_SD_JWT, sdJwtCredential2, ID_123).apply { identifier = UUID_1 },
+            CredentialInputDescriptorMapping(FormatType.VC_SD_JWT, sdJwtCredential1, "id-456").apply { identifier = UUID_2 },
             CredentialInputDescriptorMapping(FormatType.VC_SD_JWT, sampleVcSdJwtWithNoHolderBinding, "id-456").apply { identifier = "uuid-3" },
         )
         val unsignedVPTokenResult = Pair(
             mapOf(
-                "uuid-1" to "unsigned-kb-jwt-1",
-                "uuid-2" to "unsigned-kb-jwt-2"
+                UUID_1 to "unsigned-kb-jwt-1",
+                UUID_2 to "unsigned-kb-jwt-2"
             ),
             listOf(
                 UnsignedVPToken(
@@ -172,8 +177,8 @@ class SdJwtVPTokenBuilderJvmTest {
             )
         )
         val vpTokenSigningResults = listOf(
-            VPTokenSigningResult(id = "uuid-1", signedData = sig1),
-            VPTokenSigningResult(id = "uuid-2", signedData = sig2)
+            VPTokenSigningResult(id = UUID_1, signedData = sig1),
+            VPTokenSigningResult(id = UUID_2, signedData = sig2)
         )
 
         val builder = SdJwtVPTokenBuilder()
@@ -199,3 +204,4 @@ class SdJwtVPTokenBuilderJvmTest {
         return vpToken
     }
 }
+

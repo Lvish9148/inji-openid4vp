@@ -9,37 +9,43 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
+private const val TOKEN_1 = "token-1"
+private const val KID_TOKEN_1 = "kid-token-1"
+private const val UNSIGNED_DATA_1 = "unsigned-data-1"
+private const val DUP_TOKEN = "dup-token"
+private const val DUP_ID = "dup-id"
+
 class VPTokenUtilsTest {
 
     @Test
     fun `getUnsignedVPToken should return token for matching identifier`() {
         val token = UnsignedVPToken(
-            id = "token-1",
+            id = TOKEN_1,
             format = FormatType.VC_SD_JWT,
-            holderKeyReference = "kid-token-1",
+            holderKeyReference = KID_TOKEN_1,
             signatureAlgorithm = "ES256K",
-            dataToSign = "unsigned-data-1".toByteArray()
+            dataToSign = UNSIGNED_DATA_1.toByteArray()
         )
 
         val result = getUnsignedVPToken(
             unsignedVPTokens = listOf(token),
-            identifier = "token-1",
+            identifier = TOKEN_1,
             className = "VPTokenUtilsTest"
         )
 
-        assertEquals("token-1", result.id)
+        assertEquals(TOKEN_1, result.id)
         assertEquals(FormatType.VC_SD_JWT, result.format)
-        assertEquals("kid-token-1", result.holderKeyReference)
+        assertEquals(KID_TOKEN_1, result.holderKeyReference)
     }
 
     @Test
     fun `getUnsignedVPToken should throw InvalidData for missing identifier`() {
         val token = UnsignedVPToken(
-            id = "token-1",
+            id = TOKEN_1,
             format = FormatType.VC_SD_JWT,
-            holderKeyReference = "kid-token-1",
+            holderKeyReference = KID_TOKEN_1,
             signatureAlgorithm = "ES256K",
-            dataToSign = "unsigned-data-1".toByteArray()
+            dataToSign = UNSIGNED_DATA_1.toByteArray()
         )
 
         val exception = assertFailsWith<InvalidData> {
@@ -60,14 +66,14 @@ class VPTokenUtilsTest {
     fun `getUnsignedVPToken should throw InvalidData for duplicate identifier`() {
         val duplicateTokens = listOf(
             UnsignedVPToken(
-                id = "dup-token",
+                id = DUP_TOKEN,
                 format = FormatType.VC_SD_JWT,
                 holderKeyReference = "kid-1",
                 signatureAlgorithm = "ES256K",
-                dataToSign = "unsigned-data-1".toByteArray()
+                dataToSign = UNSIGNED_DATA_1.toByteArray()
             ),
             UnsignedVPToken(
-                id = "dup-token",
+                id = DUP_TOKEN,
                 format = FormatType.VC_SD_JWT,
                 holderKeyReference = "kid-2",
                 signatureAlgorithm = "ES256K",
@@ -78,7 +84,7 @@ class VPTokenUtilsTest {
         val exception = assertFailsWith<InvalidData> {
             getUnsignedVPToken(
                 unsignedVPTokens = duplicateTokens,
-                identifier = "dup-token",
+                identifier = DUP_TOKEN,
                 className = "VPTokenUtilsTest"
             )
         }
@@ -92,14 +98,14 @@ class VPTokenUtilsTest {
     @Test
     fun `getVPTokenSigningResult should throw InvalidData for duplicate identifier`() {
         val signingResults = listOf(
-            VPTokenSigningResult(id = "dup-id", signedData = "sig-1".toByteArray()),
-            VPTokenSigningResult(id = "dup-id", signedData = "sig-2".toByteArray())
+            VPTokenSigningResult(id = DUP_ID, signedData = "sig-1".toByteArray()),
+            VPTokenSigningResult(id = DUP_ID, signedData = "sig-2".toByteArray())
         )
 
         val exception = assertFailsWith<InvalidData> {
             getVPTokenSigningResult(
                 vpTokenSigningResults = signingResults,
-                identifier = "dup-id",
+                identifier = DUP_ID,
                 className = "VPTokenUtilsTest"
             )
         }
@@ -130,4 +136,5 @@ class VPTokenUtilsTest {
         )
     }
 }
+
 

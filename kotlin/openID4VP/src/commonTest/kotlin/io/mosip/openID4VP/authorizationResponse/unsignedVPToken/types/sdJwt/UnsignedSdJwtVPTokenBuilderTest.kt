@@ -27,6 +27,11 @@ import io.mosip.openID4VP.common.getObjectMapper
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import java.util.Base64
 
+private const val MOCK_VERIFIER_RESPONSE = "https://mock-verifier.com/response"
+private const val DID_JWK_EXAMPLE = "did:jwk:example"
+private const val SHA_256 = "SHA-256"
+private const val UUID_Z = "uuid-z"
+private const val UUID_A = "uuid-a"
 
 class UnsignedSdJwtVPTokenBuilderTest {
 
@@ -38,7 +43,7 @@ class UnsignedSdJwtVPTokenBuilderTest {
         responseType = "vp_token",
         responseMode = "direct_post",
         presentationDefinition = deserializeAndValidate(presentationDefinitionMap, PresentationDefinitionSerializer),
-        responseUri = "https://mock-verifier.com/response",
+        responseUri = MOCK_VERIFIER_RESPONSE,
         redirectUri = null,
         nonce = nonce,
         state = null,
@@ -49,7 +54,7 @@ class UnsignedSdJwtVPTokenBuilderTest {
         clientId = clientId,
         responseType = "vp_token",
         responseMode = "direct_post",
-        responseUri = "https://mock-verifier.com/response",
+        responseUri = MOCK_VERIFIER_RESPONSE,
         redirectUri = null,
         nonce = nonce,
         state = null,
@@ -69,7 +74,7 @@ class UnsignedSdJwtVPTokenBuilderTest {
         clientId = clientId,
         responseType = "vp_token",
         responseMode = "direct_post",
-        responseUri = "https://mock-verifier.com/response",
+        responseUri = MOCK_VERIFIER_RESPONSE,
         redirectUri = null,
         nonce = nonce,
         state = null,
@@ -115,7 +120,7 @@ class UnsignedSdJwtVPTokenBuilderTest {
             "${header["alg"]}.${payload["nonce"]}.${payload["sd_hash"]}.unsigned"
         }
 
-        every { DidPublicKeyResolver().resolve("did:jwk:example", null) } returns mockPublicKey
+        every { DidPublicKeyResolver().resolve(DID_JWK_EXAMPLE, null) } returns mockPublicKey
         every { mockPublicKey.algorithm } returns "Ed25519"
     }
 
@@ -182,8 +187,8 @@ class UnsignedSdJwtVPTokenBuilderTest {
         every {
             JWSHandler.extractDataJsonFromJws(any(), JWSHandler.JwsPart.PAYLOAD)
         } returns mutableMapOf(
-            "_sd_alg" to "SHA-256",
-            "cnf" to mapOf("kid" to "did:jwk:example")
+            "_sd_alg" to SHA_256,
+            "cnf" to mapOf("kid" to DID_JWK_EXAMPLE)
         )
 
         val builder = UnsignedSdJwtVPTokenBuilder(
@@ -215,8 +220,8 @@ class UnsignedSdJwtVPTokenBuilderTest {
         every {
             JWSHandler.extractDataJsonFromJws(any(), JWSHandler.JwsPart.PAYLOAD)
         } returns mutableMapOf(
-            "_sd_alg" to "SHA-256",
-            "cnf" to mapOf("kid" to "did:jwk:example")
+            "_sd_alg" to SHA_256,
+            "cnf" to mapOf("kid" to DID_JWK_EXAMPLE)
         )
 
         val builder = UnsignedSdJwtVPTokenBuilder(
@@ -251,7 +256,7 @@ class UnsignedSdJwtVPTokenBuilderTest {
         every {
             JWSHandler.extractDataJsonFromJws(any(), JWSHandler.JwsPart.PAYLOAD)
         } returns mutableMapOf(
-            "_sd_alg" to "SHA-256",
+            "_sd_alg" to SHA_256,
             "cnf" to mapOf("kid" to "did:jwk:...")
         )
 
@@ -282,7 +287,7 @@ class UnsignedSdJwtVPTokenBuilderTest {
         every {
             JWSHandler.extractDataJsonFromJws(any(), JWSHandler.JwsPart.PAYLOAD)
         } returns mutableMapOf(
-            "_sd_alg" to "SHA-256"
+            "_sd_alg" to SHA_256
         )
 
         val builder = UnsignedSdJwtVPTokenBuilder(
@@ -309,14 +314,14 @@ class UnsignedSdJwtVPTokenBuilderTest {
         every {
             JWSHandler.extractDataJsonFromJws(eq(sdJwt1.split("~")[0]), JWSHandler.JwsPart.PAYLOAD)
         } returns mutableMapOf(
-            "_sd_alg" to "SHA-256",
-            "cnf" to mapOf("kid" to "did:jwk:example")
+            "_sd_alg" to SHA_256,
+            "cnf" to mapOf("kid" to DID_JWK_EXAMPLE)
         )
 
         every {
             JWSHandler.extractDataJsonFromJws(eq(sdJwt2.split("~")[0]), JWSHandler.JwsPart.PAYLOAD)
         } returns mutableMapOf(
-            "_sd_alg" to "SHA-256"
+            "_sd_alg" to SHA_256
         )
 
         val builder = UnsignedSdJwtVPTokenBuilder(
@@ -345,7 +350,7 @@ class UnsignedSdJwtVPTokenBuilderTest {
     @Test
     fun `should return unsigned tokens in credential order for multiple credentials with cnf`() {
         mockkObject(UUIDGenerator)
-        every { UUIDGenerator.generateUUID() } returnsMany listOf("uuid-z", "uuid-a")
+        every { UUIDGenerator.generateUUID() } returnsMany listOf(UUID_Z, UUID_A)
         every { hashData(sdJwt1, any()) } returns "hash-for-first"
         every { hashData(sdJwt2, any()) } returns "hash-for-second"
 
@@ -355,8 +360,8 @@ class UnsignedSdJwtVPTokenBuilderTest {
                 JWSHandler.JwsPart.PAYLOAD
             )
         } returns mutableMapOf(
-            "_sd_alg" to "SHA-256",
-            "cnf" to mapOf("kid" to "did:jwk:example")
+            "_sd_alg" to SHA_256,
+            "cnf" to mapOf("kid" to DID_JWK_EXAMPLE)
         )
 
         every {
@@ -365,8 +370,8 @@ class UnsignedSdJwtVPTokenBuilderTest {
                 JWSHandler.JwsPart.PAYLOAD
             )
         } returns mutableMapOf(
-            "_sd_alg" to "SHA-256",
-            "cnf" to mapOf("kid" to "did:jwk:example")
+            "_sd_alg" to SHA_256,
+            "cnf" to mapOf("kid" to DID_JWK_EXAMPLE)
         )
 
         val builder = UnsignedSdJwtVPTokenBuilder(
@@ -389,7 +394,7 @@ class UnsignedSdJwtVPTokenBuilderTest {
         @Suppress("UNCHECKED_CAST")
         val identifierToUnsignedKBJWT = payload as? Map<String, String>
         assertNotNull(identifierToUnsignedKBJWT)
-        assertEquals(listOf("uuid-z", "uuid-a"), identifierToUnsignedKBJWT.keys.toList())
+        assertEquals(listOf(UUID_Z, UUID_A), identifierToUnsignedKBJWT.keys.toList())
         assertEquals(
             listOf(
                 "EdDSA.$nonce.hash-for-first.unsigned",
@@ -397,7 +402,7 @@ class UnsignedSdJwtVPTokenBuilderTest {
             ),
             unsignedVPToken.map { String(it.dataToSign, Charsets.UTF_8) }
         )
-        assertEquals(listOf("uuid-z", "uuid-a"), mappings.map { it.identifier })
+        assertEquals(listOf(UUID_Z, UUID_A), mappings.map { it.identifier })
         assertEquals(2, unsignedVPToken.size)
     }
 
@@ -406,7 +411,7 @@ class UnsignedSdJwtVPTokenBuilderTest {
         every {
             JWSHandler.extractDataJsonFromJws(any(), JWSHandler.JwsPart.PAYLOAD)
         } returns mutableMapOf(
-            "_sd_alg" to "SHA-256",
+            "_sd_alg" to SHA_256,
             "cnf" to mapOf("x5t" to "somethumbprint") // Neither "kid" nor "jwk"
         )
 
@@ -443,7 +448,7 @@ class UnsignedSdJwtVPTokenBuilderTest {
         every {
             JWSHandler.extractDataJsonFromJws(any(), JWSHandler.JwsPart.PAYLOAD)
         } returns mutableMapOf(
-            "_sd_alg" to "SHA-256",
+            "_sd_alg" to SHA_256,
             "cnf" to mapOf("jwk" to jwkMap)
         )
         every { JWSHandler.createUnsignedJWS(capture(capturedHeader), any()) } answers {
@@ -489,7 +494,7 @@ class UnsignedSdJwtVPTokenBuilderTest {
         every {
             JWSHandler.extractDataJsonFromJws(any(), JWSHandler.JwsPart.PAYLOAD)
         } returns mutableMapOf(
-            "_sd_alg" to "SHA-256",
+            "_sd_alg" to SHA_256,
             "cnf" to mapOf("jwk" to jwkMap)
         )
         every { JWSHandler.createUnsignedJWS(capture(capturedHeader), any()) } answers {
@@ -665,3 +670,4 @@ class UnsignedSdJwtVPTokenBuilderTest {
         return "$header.$body.signature~"
     }
 }
+

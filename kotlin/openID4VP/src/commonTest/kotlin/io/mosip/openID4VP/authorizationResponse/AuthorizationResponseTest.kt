@@ -8,7 +8,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
-
+private const val TEST_LITERAL = "eryy....ewr"
+private const val TEST_HOLDER_KEY = "did:example:holder#key-1"
 class AuthorizationResponseTest {
 
     private val ldpVPToken = LdpVPToken(
@@ -22,9 +23,9 @@ class AuthorizationResponseTest {
             created = "time",
             challenge = "challenge",
             domain = "domain",
-            proofValue = "eryy....ewr",
+            proofValue = TEST_LITERAL,
             proofPurpose = "authentication",
-            verificationMethod = "did:example:holder#key-1"
+            verificationMethod = TEST_HOLDER_KEY
         )
     )
 
@@ -89,9 +90,9 @@ class AuthorizationResponseTest {
                 "created" to "time",
                 "challenge" to "challenge",
                 "domain" to "domain",
-                "proofValue" to "eryy....ewr",
+                "proofValue" to TEST_LITERAL,
                 "proofPurpose" to "authentication",
-                "verificationMethod" to "did:example:holder#key-1"
+                "verificationMethod" to TEST_HOLDER_KEY
             )
         )
 
@@ -139,9 +140,9 @@ class AuthorizationResponseTest {
                 "created" to "time",
                 "challenge" to "challenge",
                 "domain" to "domain",
-                "proofValue" to "eryy....ewr",
+                "proofValue" to TEST_LITERAL,
                 "proofPurpose" to "authentication",
-                "verificationMethod" to "did:example:holder#key-1"
+                "verificationMethod" to TEST_HOLDER_KEY
             )
         )
         
@@ -154,3 +155,4 @@ class AuthorizationResponseTest {
         assertEquals(expectedMap, actualMap)
     }
 }
+
