@@ -294,7 +294,6 @@ class DirectPostResponseModeHandlerTest {
             authorizationRequestForResponseModeJWT
         )
 
-        assertTrue(result is Map<*, *>, "Result should be a Map")
         result.keys.forEach { key ->
             assertEquals(String::class, key::class, "All keys should be String type")
         }
@@ -322,7 +321,6 @@ class DirectPostResponseModeHandlerTest {
             authorizationRequestForResponseModeJWT
         )
 
-        assertTrue(result is Map<*, *>, "Result should be a Map")
         result.keys.forEach { key ->
             assertEquals(String::class, key::class, "All keys should be String type")
         }

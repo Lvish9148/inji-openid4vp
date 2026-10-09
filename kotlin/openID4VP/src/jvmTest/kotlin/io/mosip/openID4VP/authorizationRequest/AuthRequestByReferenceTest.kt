@@ -41,6 +41,7 @@ import io.mosip.openID4VP.testData.requestUrl
 import io.mosip.openID4VP.testData.trustedVerifiers
 import io.mosip.openID4VP.testData.walletConfig
 import io.mosip.openID4VP.testData.walletNonce
+import io.mosip.openID4VP.testData.AuthorizationRequestObjectOptions
 import io.mosip.vercred.vcverifier.keyResolver.types.did.DidPublicKeyResolver
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -553,7 +554,9 @@ class AuthRequestByReferenceTest {
                     put("typ", AUTHZ_REQ_JWT_TYP)
                     put("alg", "EdDSA")
                 },
+                options = AuthorizationRequestObjectOptions(
                 isPresentationDefinitionUriPresent = true
+                )
             ).toString(),
             mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
@@ -696,7 +699,9 @@ class AuthRequestByReferenceTest {
                 PRE_REGISTERED,
                 authorizationRequestParamsMap,
                 jwtHeader = jwtHeader,
-                isPresentationDefinitionUriPresent = true
+                options = AuthorizationRequestObjectOptions(
+                    isPresentationDefinitionUriPresent = true
+                )
             ).toString(), mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
@@ -768,7 +773,9 @@ class AuthRequestByReferenceTest {
             200, createAuthorizationRequestObject(
                 PRE_REGISTERED, authorizationRequestParamsMap,
                 jwtHeader = jwtHeader,
-                isPresentationDefinitionUriPresent = true
+                options = AuthorizationRequestObjectOptions(
+                    isPresentationDefinitionUriPresent = true
+                )
             ).toString(), mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )
 
@@ -867,8 +874,9 @@ class AuthRequestByReferenceTest {
                 PRE_REGISTERED,
                 authorizationRequestParamsMap,
                 jwtHeader = jwtHeader,
-
-                removeClientId = true
+                options = AuthorizationRequestObjectOptions(
+                    removeClientId = true
+                )
             ).toString(),
             mapOf(CONTENT_TYPE_HEADER to listOf(AUTHZ_REQ_JWT_CONTENT_TYPE))
         )

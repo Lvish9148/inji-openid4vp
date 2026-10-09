@@ -12,6 +12,18 @@ import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 
 private val className = ClientMetadata::class.simpleName!!
 
+private fun toStringAnyMap(raw: Map<*, *>): Map<String, Any> {
+    return raw.entries.associate { (key, value) ->
+        if (key !is String || value == null) {
+            throw OpenID4VPExceptions.InvalidData(
+                "client_metadata must be of type String or Map",
+                className
+            )
+        }
+        key to value
+    }
+}
+
 enum class ClientMetadataSpecVersionHandler {
     V1, DRAFT_23;
 
@@ -35,8 +47,7 @@ enum class ClientMetadataSpecVersionHandler {
                         is ClientMetadataDraft23 -> clientMetadataRaw
                         is String -> deserializeAndValidate(clientMetadataRaw, ClientMetadataDraft23Serializer)
                         is Map<*, *> -> deserializeAndValidate(
-                            @Suppress("UNCHECKED_CAST")
-                            clientMetadataRaw as Map<String, Any>,
+                            toStringAnyMap(clientMetadataRaw),
                             ClientMetadataDraft23Serializer
                         )
                         else -> throw OpenID4VPExceptions.InvalidData(
@@ -50,8 +61,7 @@ enum class ClientMetadataSpecVersionHandler {
                         is ClientMetadata -> clientMetadataRaw
                         is String -> deserializeAndValidate(clientMetadataRaw, ClientMetadataSerializer)
                         is Map<*, *> -> deserializeAndValidate(
-                            @Suppress("UNCHECKED_CAST")
-                            clientMetadataRaw as Map<String, Any>,
+                            toStringAnyMap(clientMetadataRaw),
                             ClientMetadataSerializer
                         )
                         else -> throw OpenID4VPExceptions.InvalidData(

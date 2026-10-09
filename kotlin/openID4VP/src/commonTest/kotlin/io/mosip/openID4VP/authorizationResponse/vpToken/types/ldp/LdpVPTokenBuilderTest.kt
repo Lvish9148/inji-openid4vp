@@ -9,7 +9,7 @@ import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSign
 import io.mosip.openID4VP.common.encodeToBase64Url
 import io.mosip.openID4VP.common.encodeToMultibaseBase58btc
 import io.mosip.openID4VP.constants.SignatureSuiteAlgorithm
-import io.mosip.openID4VP.testData.ldpVPToken
+import io.mosip.openID4VP.testData.ldpVPToken as testDataLdpVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPToken
 import io.mosip.openID4VP.constants.FormatType.LDP_VC
 import kotlin.test.*
@@ -288,7 +288,7 @@ class LdpVPTokenBuilderTest {
 
     @Test
     fun `should use existing LdpVPToken from testData`() {
-        val testToken = ldpVPToken as LdpVPToken
+        val testToken = testDataLdpVPToken
         val payloadCopy = LdpVPToken(
             context = testToken.context,
             type = testToken.type,

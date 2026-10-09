@@ -180,7 +180,7 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
             SpecVersion.DRAFT_23,
             (authorizationRequestParameters + mapOf(
                 CLIENT_METADATA.value to clientMetadataString
-            )) as MutableMap<String, Any>,
+            )).toMutableMap(),
             WalletConfig(trustedVerifiers = trustedVerifiersWithoutClientMetadata),
             setResponseDispatchInfo,
             walletNonce

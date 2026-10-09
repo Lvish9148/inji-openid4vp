@@ -46,7 +46,7 @@ kotlin {
                 implementation(libs.vcverifier)
                 implementation(libs.bcpkix)
                 implementation(libs.google.tink)
-                implementation("com.augustcellars.cose:cose-java:1.1.0")
+                implementation(libs.augustcellars.cose)
             }
         }
         val commonTest by getting {
@@ -189,23 +189,34 @@ tasks.withType<Test> {
 
 tasks {
     register<Wrapper>("wrapper") {
+        group = "build setup"
+        description = "Generates the Gradle wrapper files for this project"
         gradleVersion = "8.5"
     }
 }
 
-tasks.register("prepareKotlinBuildScriptModel"){}
+tasks.register("prepareKotlinBuildScriptModel") {
+    group = "ide"
+    description = "No-op task required by the Kotlin IDE build script model"
+}
 tasks.register<Jar>("jarRelease") {
+    group = "build"
+    description = "Assembles the release JAR, including generated Javadoc"
     dependsOn("dokkaJavadoc")
     dependsOn("assembleRelease")
     dependsOn("jvmJar")
 }
 
 tasks.register<Jar>("javadocJar") {
+    group = "documentation"
+    description = "Packages the generated Dokka HTML docs into a javadoc JAR"
     dependsOn("dokkaJavadoc")
     archiveClassifier.set("javadoc")
     from(tasks.named("dokkaHtml").get().outputs.files)
 }
 tasks.register("generatePom") {
+    group = "publishing"
+    description = "Generates the POM files for the AAR and JAR release publications"
     dependsOn("generatePomFileForAarPublication", "generatePomFileForJarReleasePublication")
 }
 

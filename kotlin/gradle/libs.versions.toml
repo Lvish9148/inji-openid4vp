@@ -25,7 +25,7 @@ sonarqube = "5.1.0.4872"
 googleTink = "1.11.0"
 assertj = "3.24.2"
 dokka = "1.9.20"
-
+augustcellarsCose = "1.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -52,6 +52,7 @@ jupiter-junit = {group = "org.junit.jupiter", name = "junit-jupiter-api", versio
 vcverifier = {group = "io.inji", name = "vcverifier-jar", version.ref = "vcverifier"}
 google-tink = {group = "com.google.crypto.tink", name = "tink", version.ref = "googleTink"}
 assertj = {group = "org.assertj", name = "assertj-core", version.ref = "assertj"}
+augustcellars-cose = { group = "com.augustcellars.cose", name = "cose-java", version.ref = "augustcellarsCose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

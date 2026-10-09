@@ -111,13 +111,13 @@ abstract class ClientIdPrefixBasedAuthorizationRequestHandler(
             .getResponseEndpoint(authorizationRequestParameters)
 
         // redirect_uri must not be present for direct_post / direct_post.jwt
-        if (responseMode == DIRECT_POST.value || responseMode == DIRECT_POST_JWT.value) {
-            if (authorizationRequestParameters.containsKey(REDIRECT_URI.value)) {
-                throw OpenID4VPExceptions.InvalidData(
-                    "${REDIRECT_URI.value} should not be present for given response_mode",
-                    className
-                )
-            }
+        if ((responseMode == DIRECT_POST.value || responseMode == DIRECT_POST_JWT.value) &&
+            authorizationRequestParameters.containsKey(REDIRECT_URI.value)
+        ) {
+            throw OpenID4VPExceptions.InvalidData(
+                "${REDIRECT_URI.value} should not be present for given response_mode",
+                className
+            )
         }
 
         responseDispatchInfo = ResponseDispatchInfo(
@@ -260,7 +260,7 @@ abstract class ClientIdPrefixBasedAuthorizationRequestHandler(
         }
 
         validateJWTRequest(request)
-        val authorizationRequestObject = try {
+        val authorizationRequestObject: Map<String, Any> = try {
             JWSHandler.extractDataJsonFromJws(request, JWSHandler.JwsPart.PAYLOAD)
         } catch (e: Exception) {
             throw OpenID4VPExceptions.InvalidData(
@@ -275,7 +275,7 @@ abstract class ClientIdPrefixBasedAuthorizationRequestHandler(
             className
         )
 
-        this.authorizationRequestParameters = authorizationRequestObject
+        this.authorizationRequestParameters = authorizationRequestObject.toMutableMap()
     }
 
     private fun validateRequestUriResponse(
@@ -339,7 +339,7 @@ abstract class ClientIdPrefixBasedAuthorizationRequestHandler(
 
     private fun validateJWTRequest(jws: String) {
         try {
-            val header = try {
+            val header: Map<String, Any> = try {
                 JWSHandler.extractDataJsonFromJws(jws, JWSHandler.JwsPart.HEADER)
             } catch (e: Exception) {
                 throw OpenID4VPExceptions.VerificationFailure(
@@ -530,7 +530,7 @@ abstract class ClientIdPrefixBasedAuthorizationRequestHandler(
             }
         }
 
-        fun getAuthorizationRequest(authorizationRequestParameters: MutableMap<String, Any>): AuthorizationRequest {
+        fun getAuthorizationRequest(authorizationRequestParameters: Map<String, Any>): AuthorizationRequest {
             return when (this) {
                 is Draft23 -> AuthorizationPresentationExchangeRequest(
                     clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!,

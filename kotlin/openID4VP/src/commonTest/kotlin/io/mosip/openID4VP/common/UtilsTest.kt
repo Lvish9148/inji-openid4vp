@@ -102,7 +102,7 @@ class UtilsTest {
     @Test
     fun `convertJsonToMap should correctly parse JSON string`() {
         val json = "{\"key\":\"value\"}"
-        val result = convertJsonToMap(json)
+        val result = convertJsonToMap(json).toMap()
         assertEquals("value", result["key"])
     }
 

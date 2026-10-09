@@ -163,7 +163,10 @@ internal fun resolveJwksFromUri(jwksUri: String, className: String): Jwks {
 fun resolveSdJwtKeyAndAlg(sdJwtCredential: String, className: String): Pair<String, String> {
 
     val sdJwt = sdJwtCredential.split("~")[0]
-    val payload = JWSHandler.extractDataJsonFromJws(sdJwt, JWSHandler.JwsPart.PAYLOAD)
+    val payload = JWSHandler.extractDataJsonFromJws(
+        sdJwt,
+        JWSHandler.JwsPart.PAYLOAD
+    ).toMap()
 
     val cnf = payload["cnf"] as? Map<*, *>
         ?: throw InvalidData("cnf missing in SD-JWT", className)

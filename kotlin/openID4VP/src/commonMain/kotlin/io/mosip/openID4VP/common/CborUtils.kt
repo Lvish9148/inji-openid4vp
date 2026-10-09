@@ -95,7 +95,10 @@ private fun toDataItem(value: Any?, isKey: Boolean = false): DataItem? {
         is Long -> if (value >= 0) UnsignedInteger(value) else NegativeInteger(value)
         is Double -> DoublePrecisionFloat(value)
         is DataItem -> value
-        null -> if (isKey) throw IllegalArgumentException("Key cannot be null") else null
+        null -> {
+            require(!isKey) { "Key cannot be null" }
+            null
+        }
         else -> throw IllegalArgumentException("Unsupported ${if (isKey) "key" else "value"} type: ${value.javaClass}")
     }
 }

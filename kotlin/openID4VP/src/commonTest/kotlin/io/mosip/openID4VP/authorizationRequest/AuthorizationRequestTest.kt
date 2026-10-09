@@ -259,7 +259,6 @@ class AuthorizationRequestTest {
 
         val actualValue =
             openID4VP.authenticateVerifier(encodedAuthorizationRequest)
-        assertTrue(actualValue is AuthorizationRequest)
     }
 
     @Test
@@ -340,7 +339,6 @@ class AuthorizationRequestTest {
 
         val actualValue =
             openID4VP.authenticateVerifier(encodedAuthorizationRequest)
-        assertTrue(actualValue is AuthorizationRequest)
     }
 
     @Test
@@ -382,7 +380,6 @@ class AuthorizationRequestTest {
 
         val actualValue =
             openID4VP.authenticateVerifier(encodedAuthorizationRequest)
-        assertTrue(actualValue is AuthorizationRequest)
     }
 
     @Test
@@ -735,7 +732,7 @@ class AuthorizationRequestTest {
             specVersion = SpecVersion.DRAFT_23,
             authorizationRequestParameters = (requestParams + clientIdOfPreRegistered + mapOf(
                 "transaction_data" to "some_value",
-            )) as MutableMap<String, Any>,
+            )).toMutableMap(),
             walletConfig = WalletConfig(
                 trustedVerifiers = listOf(
                     Verifier(

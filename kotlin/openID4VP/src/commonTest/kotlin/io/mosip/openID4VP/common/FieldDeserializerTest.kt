@@ -83,11 +83,16 @@ class FieldDeserializerTest {
             })
         }
         val deserializer = FieldDeserializer(jsonObject, "TestClass", "parentField")
-        val result = deserializer.deserializeField<Map<String, Any>>("testField", "Map<String, Any>")
+        val result = assertNotNull(
+            deserializer.deserializeField<Map<String, Any>>(
+                "testField",
+                "Map<String, Any>"
+            )
+        )
 
-        assertTrue(result?.get("array") is List<*>)
-        assertEquals("item1", (result?.get("array") as List<*>)[0])
-        assertEquals("item2", (result?.get("array") as List<*>)[1])
+        assertTrue(result.get("array") is List<*>)
+        assertEquals("item1", (result.get("array") as List<*>)[0])
+        assertEquals("item2", (result.get("array") as List<*>)[1])
     }
 
     @Test

@@ -117,7 +117,12 @@ internal class UnsignedSdJwtVPTokenBuilder(
         sdJwtPayload: Map<String, Any>,
         shouldAddCryptographicHolderBinding: (Map<String, Any>) -> Boolean
     ) {
-        val confirmationKeyClaim = sdJwtPayload["cnf"] as? Map<String, Any>
+        val confirmationKeyClaim = when (val cnf = sdJwtPayload["cnf"]) {
+            is Map<*, *> -> cnf.entries
+                .filter { it.key is String && it.value != null }
+                .associate { (key, value) -> key as String to value as Any }
+            else -> null
+        }
         if (!shouldAddCryptographicHolderBinding(confirmationKeyClaim ?: emptyMap())) {
             return
         }

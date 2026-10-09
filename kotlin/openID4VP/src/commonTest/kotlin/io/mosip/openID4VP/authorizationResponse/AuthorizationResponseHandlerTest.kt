@@ -1532,6 +1532,7 @@ class AuthorizationResponseHandlerTest {
         // Setup mocks
         mockkObject(ResponseModeBasedHandlerFactory)
         every { ResponseModeBasedHandlerFactory.get("direct_post") } returns mockResponseHandler
+        val state = assertNotNull(authorizationPresentationExchangeRequest.state)
         every {
             mockResponseHandler.getAuthorizationResponse(
                 dispatchInfo = any(),
@@ -1540,7 +1541,7 @@ class AuthorizationResponseHandlerTest {
             )
         } returns mapOf(
             "response" to "finalized",
-            "state" to authorizationPresentationExchangeRequest.state!!
+            "state" to state
         )
 
         // Setup internal state first
@@ -1565,7 +1566,7 @@ class AuthorizationResponseHandlerTest {
         assertEquals(
             mapOf(
                 "response" to "finalized",
-                "state" to authorizationPresentationExchangeRequest.state!!
+                "state" to authorizationPresentationExchangeRequest.state
             ),
             result
         )
@@ -2155,23 +2156,6 @@ class AuthorizationResponseHandlerTest {
             clientMetadata = null,
             dcqlQuery = dcqlQuery
         )
-    }
-
-    private fun assertDcqlConstructionFailure(
-        expectedCauseMessage: String,
-        block: () -> Unit
-    ) {
-        val exception = assertFailsWith<VerifiablePresentationConstructionFailure> {
-            block()
-        }
-
-        assertEquals("server_error", exception.errorCode)
-        assertEquals(
-            PRESENTATION_INTERNAL_ERROR_MESSAGE,
-            exception.message
-        )
-        val cause = assertIs<InvalidData>(exception.cause)
-        assertTrue(cause.message!!.contains(expectedCauseMessage))
     }
 
     @Test

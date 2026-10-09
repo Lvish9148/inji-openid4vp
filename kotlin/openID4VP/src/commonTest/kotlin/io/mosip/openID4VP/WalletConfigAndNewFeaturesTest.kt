@@ -178,28 +178,28 @@ class UnrecognizedClientIdPrefixFallbackTest {
 
     @Test
     fun `extractClientIdPrefix returns DECENTRALIZED_IDENTIFIER for known prefix`() {
-        val params: MutableMap<String, Any> = mutableMapOf(
+        val params = mapOf(
             CLIENT_ID.value to "decentralized_identifier:did:web:example.com"
         )
-        val result = extractClientIdPrefix(params)
+        val result = extractClientIdPrefix(params.toMutableMap())
         assertEquals(ClientIdPrefix.DECENTRALIZED_IDENTIFIER.value, result)
     }
 
     @Test
     fun `extractClientIdPrefix returns REDIRECT_URI for redirect_uri prefix`() {
-        val params: MutableMap<String, Any> = mutableMapOf(
+        val params = mapOf(
             CLIENT_ID.value to REDIRECT_URI_CLIENT_ID
         )
-        val result = extractClientIdPrefix(params)
+        val result = extractClientIdPrefix(params.toMutableMap())
         assertEquals(ClientIdPrefix.REDIRECT_URI.value, result)
     }
 
     @Test
     fun `extractClientIdPrefix returns PRE_REGISTERED when no colon in client_id`() {
-        val params: MutableMap<String, Any> = mutableMapOf(
+        val params = mapOf(
             CLIENT_ID.value to "simple-client-id"
         )
-        val result = extractClientIdPrefix(params)
+        val result = extractClientIdPrefix(params.toMutableMap())
         assertEquals(ClientIdPrefix.PRE_REGISTERED.value, result)
     }
 }

@@ -47,7 +47,7 @@ class `DCQLQueryUtilsTest` {
             )
         )
 
-        val result = parseAndValidateDcqlQuery(authorizationRequest)
+        val result = parseAndValidateDcqlQuery(authorizationRequest).toMap()
         val query = assertIs<DCQLQuery>(result[AuthorizationRequestFieldConstants.DCQL_QUERY.value])
 
         assertEquals(1, query.credentials.size)
@@ -71,7 +71,7 @@ class `DCQLQueryUtilsTest` {
             )
         )
 
-        val result = parseAndValidateDcqlQuery(authorizationRequest)
+        val result = parseAndValidateDcqlQuery(authorizationRequest).toMap()
         val query = assertIs<DCQLQuery>(result[AuthorizationRequestFieldConstants.DCQL_QUERY.value])
 
         assertEquals(listOf("degrees", 0, "type"), query.credentials.first().claims?.first()?.path)

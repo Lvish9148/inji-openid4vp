@@ -7,11 +7,15 @@ internal interface ProcessedCredential {
     val credentialFormat: FormatType
 }
 
+internal interface ClaimsProcessedCredential : ProcessedCredential {
+    val claims: Map<String, Any>
+}
+
 internal data class W3cProcessedCredential(
     override val credentialId: String,
     override val credentialFormat: FormatType,
-    val claims: Map<String, Any>
-) : ProcessedCredential
+    override val claims: Map<String, Any>
+) : ClaimsProcessedCredential
 
 internal data class MdocProcessedCredential(
     override val credentialId: String,
@@ -22,5 +26,5 @@ internal data class MdocProcessedCredential(
 internal data class SdJwtProcessedCredential(
     override val credentialId: String,
     override val credentialFormat: FormatType,
-    val claims: Map<String, Any>
-) : ProcessedCredential
+    override val claims: Map<String, Any>
+) : ClaimsProcessedCredential

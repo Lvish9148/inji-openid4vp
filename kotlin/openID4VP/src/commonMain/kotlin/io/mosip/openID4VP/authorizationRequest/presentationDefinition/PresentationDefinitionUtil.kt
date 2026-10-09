@@ -15,6 +15,25 @@ import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTP
 import io.mosip.openID4VP.networkManager.NetworkResponse
 
 private val className = PresentationDefinition::class.simpleName!!
+
+private fun toStringAnyMap(raw: Map<*, *>): Map<String, Any> {
+    return raw.entries.associate { (key, value) ->
+        val stringKey = key as? String
+            ?: throw OpenID4VPExceptions.InvalidData(
+                "presentation_definition must be of type String, Map, or PresentationDefinition",
+                className
+            )
+
+        val nonNullValue = value
+            ?: throw OpenID4VPExceptions.InvalidData(
+                "presentation_definition must be of type String, Map, or PresentationDefinition",
+                className
+            )
+
+        stringKey to nonNullValue
+    }
+}
+
 fun parseAndValidatePresentationDefinition(
     authorizationRequestParameters: MutableMap<String, Any>,
     isPresentationDefinitionUriSupported: Boolean
@@ -120,7 +139,7 @@ fun parseAndValidatePresentationDefinition(
         )
 
         is Map<*, *> -> deserializeAndValidate(
-            presentationDefinition as Map<String, Any>,
+            toStringAnyMap(presentationDefinition),
             PresentationDefinitionSerializer
         )
 

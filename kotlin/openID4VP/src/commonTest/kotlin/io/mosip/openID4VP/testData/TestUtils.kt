@@ -73,17 +73,22 @@ fun createUrlEncodedData(
         else -> applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
     }
     val authorizationRequestParam =
-        createAuthorizationRequest(paramList, requestParams, draftVersion) as Map<String, Any>
+        createAuthorizationRequest(paramList, requestParams, draftVersion).toMap()
 
     val charset = StandardCharsets.UTF_8.toString()
 
     val queryString = authorizationRequestParam.entries.joinToString("&") {
         "${it.key}=${URLEncoder.encode(it.value?.toString() ?: "", charset)}"
     }
-//    val urlEncodedQueryParameters = URLEncoder.encode(queryString, charset)
+
     return "openid4vp://authorize?$queryString"
 
 }
+
+ data class AuthorizationRequestObjectOptions(
+    val isPresentationDefinitionUriPresent: Boolean? = false,
+    val removeClientId: Boolean = false
+)
 
 fun createAuthorizationRequestObject(
     clientIdScheme: ClientIdPrefix,
@@ -91,9 +96,8 @@ fun createAuthorizationRequestObject(
     applicableFields: List<String>? = null,
     addValidSignature: Boolean? = true,
     jwtHeader: JsonObject? = null,
-    isPresentationDefinitionUriPresent: Boolean? = false,
     draftVersion: Int = 23,
-    removeClientId: Boolean = false,
+    options: AuthorizationRequestObjectOptions = AuthorizationRequestObjectOptions(),
 ): Any {
     val paramList =
         applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
@@ -103,7 +107,7 @@ fun createAuthorizationRequestObject(
         draftVersion
     ).let { authRequestParam ->
 
-        val param = if (isPresentationDefinitionUriPresent != true) {
+        val param = if (options.isPresentationDefinitionUriPresent != true) {
             authRequestParam + clientMetadataPresentationDefinitionMap
         } else {
             if (clientIdScheme != ClientIdPrefix.PRE_REGISTERED) {
@@ -115,7 +119,7 @@ fun createAuthorizationRequestObject(
             }
         }.toMutableMap()
 
-        if (removeClientId) {
+        if (options.removeClientId) {
             param.remove(CLIENT_ID.value)
         }
 
@@ -218,5 +222,5 @@ fun assertWalletConfigAndMetadata(
         walletConfig.authorizationEncryptionEncValuesSupported?.map { it.value },
         walletMetadata["authorization_encryption_enc_values_supported"]
     )
-    assertEquals(walletConfig.responseTypesSupported?.map { it.value }, walletMetadata["response_types_supported"])
+    assertEquals(walletConfig.responseTypesSupported.map { it.value }, walletMetadata["response_types_supported"])
 }

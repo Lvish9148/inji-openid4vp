@@ -50,7 +50,7 @@ class JWEHandlerJvmTest {
         val jweParts = encryptedResponse.split(".")
         assertEquals(5, jweParts.size)
 
-        val decodedJWEHeader = convertJsonToMap(String(decodeFromBase64Url(jweParts[0])))
+        val decodedJWEHeader = convertJsonToMap(String(decodeFromBase64Url(jweParts[0]))).toMap()
 
         assertEquals(walletNonce, decodedJWEHeader["apu"])
         assertEquals(verifierNonce, decodedJWEHeader["apv"])

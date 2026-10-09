@@ -39,41 +39,62 @@ class FieldDeserializer(
 			throw OpenID4VPExceptions.InvalidInput(listOf(parentField, key),fieldType,className)
 
 		}
-		//field is mandatory or optional and it is present in the input
-		if (data != null) {
-			val res = when {
-				deserializer != null -> Json.decodeFromJsonElement(
-					deserializer,
-					data
-				) // Custom fields
-
-				fieldType == "String" -> {
-					validateFieldType(data, fieldType, parentField, key, className)
-					(data as JsonPrimitive).content as T
-				}
-
-				fieldType == "Boolean" -> {
-					validateFieldType(data, fieldType, parentField, key, className)
-					(data as JsonPrimitive).boolean as T
-				}
-
-				fieldType.startsWith("List") -> Json.decodeFromJsonElement(
-					ListSerializer(String.serializer()),
-					data
-				) as T
-
-				fieldType.startsWith("Map") -> Json.decodeFromJsonElement<Map<String, JsonElement>>(data)
-					.mapValues { (_, value) -> parseDynamicValue(value) } as T
-
-				else -> throw SerializationException("Unsupported field type: $fieldType")
+		//field is mandatory but it is not present in the input
+		if (data == null) {
+			if (isMandatory) {
+				throw OpenID4VPExceptions.MissingInput(
+					listOf(parentField, key),
+					"",
+					className
+				)
 			}
-			require(validateField(res, fieldType)) {
-				throw OpenID4VPExceptions.InvalidInput(listOf(parentField, key),fieldType,className)
-			}
-			return res
-		} else {
 			return null
 		}
+
+		if (data == JsonNull) {
+			throw OpenID4VPExceptions.InvalidInput(
+				listOf(parentField, key),
+				fieldType,
+				className
+			)
+		}
+
+		val res = when {
+			deserializer != null -> Json.decodeFromJsonElement(
+				deserializer,
+				data
+			) // Custom fields
+
+			fieldType == "String" -> {
+				validateFieldType(data, fieldType, parentField, key, className)
+				(data as JsonPrimitive).content as T
+			}
+
+			fieldType == "Boolean" -> {
+				validateFieldType(data, fieldType, parentField, key, className)
+				(data as JsonPrimitive).boolean as T
+			}
+
+			fieldType.startsWith("List") -> Json.decodeFromJsonElement(
+				ListSerializer(String.serializer()),
+				data
+			) as T
+
+			fieldType.startsWith("Map") -> Json.decodeFromJsonElement<Map<String, JsonElement>>(data)
+				.mapValues { (_, value) -> parseDynamicValue(value) } as T
+
+			else -> throw SerializationException("Unsupported field type: $fieldType")
+		}
+
+		require(validateField(res, fieldType)) {
+			throw OpenID4VPExceptions.InvalidInput(
+				listOf(parentField, key),
+				fieldType,
+				className
+			)
+		}
+
+		return res
 	}
 
 	private fun parseDynamicValue(value: JsonElement): Any {

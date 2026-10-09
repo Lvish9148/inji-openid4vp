@@ -234,11 +234,7 @@ internal class DcqlEvaluator {
                         claimQuery.path, walletCredential.namespaces
                     )
 
-                    is W3cProcessedCredential -> resolveClaimsPathPointer(
-                        claimQuery.path, walletCredential.claims
-                    )
-
-                    is SdJwtProcessedCredential -> resolveClaimsPathPointer(
+                    is ClaimsProcessedCredential -> resolveClaimsPathPointer(
                         claimQuery.path, walletCredential.claims
                     )
 
